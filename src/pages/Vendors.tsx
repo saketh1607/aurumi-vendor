@@ -38,6 +38,7 @@ const Vendors: React.FC = () => {
   const navigate = useNavigate();
   const { users } = useAppContext();
   const userDetails = useContext(UserDetailsContext);
+  console.log("User Details 123:", userDetails);
 
   const API_BASE = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
 
@@ -246,7 +247,11 @@ const Vendors: React.FC = () => {
           <h1 className="text-2xl font-bold">Manage Vendors</h1>
         </div>
         <div className="flex gap-3">
-          <Button onClick={() => navigate("/add-vendor")}>Add Vendor</Button>
+      {userDetails?.userDetails?.UserRole === 'owner' && (
+  <Button onClick={() => navigate("/add-vendor")}>
+    Add Vendor
+  </Button>
+)}
           <Button onClick={() => navigate("/vendor-categories")}>Manage Categories</Button>
         </div>
       </div>

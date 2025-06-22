@@ -30,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     ['/', '/requisitions', '/purchase-orders', '/inventory', '/assets'].includes(link.to)
   );
 
-  const navLinks = userRole === "owner" ? allNavLinks : limitedNavLinks;
+  const navLinks = userRole === "owner" ? allNavLinks : allNavLinks;
 
   return (
    <div className="d-flex flex-column min-vh-100">
@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   <div className="position-sticky top-0" style={{ zIndex: 1030 }}>
     {/* Top Navbar */}
     <nav className="navbar navbar-dark bg-primary px-3">
-      <span className="navbar-brand mb-0 h1">Purchase Tracker</span>
+      <span className="navbar-brand mb-0 h1">Vendors Management</span>
     </nav>
 
     {/* Horizontal Nav Links */}

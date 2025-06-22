@@ -166,6 +166,7 @@ const VendorCategories: React.FC = () => {
     // eslint-disable-next-line
   }, [userDetails]);
 
+
   return (
     <div className="space-y-4 px-2 sm:px-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -175,7 +176,10 @@ const VendorCategories: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold">Vendor Categories</h1>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>Add Category</Button>
+       
+           {userDetails?.UserRole === 'owner' && (
+          <Button onClick={() => setIsDialogOpen(true)}>Add Category</Button>
+        )}
       </div>
 
       {loading ? (
