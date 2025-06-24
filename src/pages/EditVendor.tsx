@@ -1,0 +1,212 @@
+import React, { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+import UserDetailsContext from "@/hooks/UserDetailsContext";
+
+const EditVendor = () => {
+  const [formData, setFormData] = useState({
+    VendorID: "",
+    Address: "",
+    VendorType: "",
+    Status: "Active",
+    Notes: "",
+    ContactID: "", // Added this to hold matched contact ID
+  });
+
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<any | null>(null);
+
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const userDetails = useContext(UserDetailsContext);
+
+  // Fetch contacts
+ useEffect(() => {
+  const fetchAll = async () => {
+    const businessID = userDetails?.userDetails?.BusinessID?.toString();
+    if (!businessID || !id) return;
+
+    try {
+      const payload = { BusinessID: businessID };
+
+      const [contactsRes, categoriesRes, vendorsRes] = await Promise.all([
+        axios.post(`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/Contacts/GetBusinessContacts`, payload),
+        axios.post(`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorCategories`, payload),
+        axios.post(`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorsList`, payload),
+      ]);
+
+      const contactsData = Array.isArray(contactsRes.data) ? contactsRes.data : [];
+      const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : [];
+      const vendorsData = Array.isArray(vendorsRes.data) ? vendorsRes.data : [];
+
+      setContacts(contactsData);
+      setCategories(categoriesData);
+
+      const vendor = vendorsData.find((v) => v.VendorID?.toString() === id);
+      if (vendor) {
+        setFormData({
+          VendorID: vendor.VendorID || "",
+          Address: vendor.Address || "",
+          VendorType: vendor.VendorType || "",
+          Status: vendor.Status || "Active",
+          Notes: vendor.Notes || "",
+          ContactID: vendor.VendorContactID || "",
+        });
+
+        const matchedContact = contactsData.find(c => c.ContactID === vendor.VendorContactID);
+        if (matchedContact) {
+          setSelectedContact(matchedContact);
+        }
+      }
+
+    } catch (error) {
+      console.error("Error loading vendor data:", error);
+    }
+  };
+
+  fetchAll();
+}, [id, userDetails]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const payload = {
+        VendorID: formData.VendorID?.toString(),
+        Address: formData.Address?.toString(),
+        VendorType: formData.VendorType?.toString(),
+        Status: formData.Status?.toString(),
+        Notes: formData.Notes?.toString() || "",
+        ContactID: formData.ContactID || "", // Include if required by API
+      };
+
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/UpdateVendor`,
+        payload
+      );
+
+      setMessage("Vendor updated successfully!");
+      navigate("/vendors");
+    } catch (error: any) {
+      console.error("Error updating vendor:", error);
+      setMessage(error?.response?.data?.message || "Update failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-1">Edit Vendor</h2>
+      <p className="text-sm text-gray-600 mb-6">Modify vendor details and click update.</p>
+
+      <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+        {selectedContact && (
+          <div className="bg-gray-100 border rounded-lg p-6 mb-2">
+            <h3 className="text-base font-semibold text-gray-800 mb-2">Contact Information</h3>
+            <div className="grid grid-cols-2 gap-y-2 gap-x-8 text-sm text-gray-700">
+              <div>
+                <span className="font-medium">BusinessName:</span> {selectedContact.BusinessName}
+              </div>
+              <div>
+                <span className="font-medium">Contact:</span>{" "}
+                {selectedContact.FirstName} {selectedContact.LastName}
+              </div>
+              <div>
+                <span className="font-medium">Phone:</span> {selectedContact.MobileNo}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service Type *</label>
+            <select
+              name="VendorType"
+              value={formData.VendorType}
+              onChange={handleChange}
+              required
+              className="w-full border px-3 py-2 rounded text-sm"
+            >
+              <option value="">Select service type</option>
+              {categories.map((category) => (
+                <option key={category.CategoryID} value={category.CategoryName}>
+                  {category.CategoryName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              name="Status"
+              value={formData.Status}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded text-sm"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <input
+              type="text"
+              name="Address"
+              value={formData.Address}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded text-sm"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <textarea
+            name="Notes"
+            value={formData.Notes}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded text-sm"
+            rows={4}
+          />
+        </div>
+
+        <div className="flex justify-between items-center pt-4">
+          <button
+            type="button"
+            onClick={() => navigate("/vendors")}
+            className="px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100 custom-cancel-button"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 text-sm"
+          >
+            {loading ? "Submitting..." : "Update Vendor"}
+          </button>
+        </div>
+
+        {message && (
+          <div className="text-sm text-center text-gray-700 mt-3">{message}</div>
+        )}
+      </form>
+    </div>
+  );
+};
+
+export default EditVendor;

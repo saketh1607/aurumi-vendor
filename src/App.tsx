@@ -14,6 +14,9 @@ import "./index.css"
 import VendorCategories from "./pages/VendorCategories";
 import AddVendorPage from "./pages/AddVendorPage";
 import Vendors from "./pages/Vendors";
+import AddBusinessContact from "./pages/AddBusinessContact";
+import AddVendor from "./pages/AddVendor";
+import EditVendor from "./pages/EditVendor";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +39,9 @@ const App = () => (
                 <Route path="/vendors" element={<Vendors/>} />
               <Route path="/add-vendor" element={<AddVendorPage />} />
               <Route path="/vendor-categories" element={<VendorCategories />} />
+              <Route path="/add-business-contact" element={<AddBusinessContact />} />
+              <Route path="/add-vendor-form" element={<AddVendor />} />
+              <Route path="/vendors/edit/:id" element={<EditVendor />} />
             
             </Routes>
           </Layout>

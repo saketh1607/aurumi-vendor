@@ -8,7 +8,8 @@ import UserDetailsContext from "@/hooks/UserDetailsContext";
 import { Edit, Delete } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import axios from "axios";
-
+import { Mail, Phone,MapPin, StickyNote } from 'lucide-react';
+  import { useParams } from "react-router-dom";
 interface Vendor {
   VendorID: number;
   Name: string;
@@ -24,8 +25,16 @@ interface Vendor {
 interface Category {
   CategoryID: string;
   CategoryName: string;
+   Description: string;
+  IsActive: boolean;
 }
 
+interface VendorCategory {
+  CategoryID: number;
+  CategoryName: string;
+  Description: string;
+  IsActive: boolean;
+}
 const Vendors: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -39,6 +48,10 @@ const Vendors: React.FC = () => {
   const { users } = useAppContext();
   const userDetails = useContext(UserDetailsContext);
   console.log("User Details 123:", userDetails);
+
+
+const { id: VendorID } = useParams();
+
 
   const API_BASE = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
 
@@ -64,12 +77,41 @@ const Vendors: React.FC = () => {
       const json = await res.json();
       const data: Vendor[] = Array.isArray(json) ? json : json.vendors || json.data || [];
       setVendors(data);
+      console.log("Fetched vendors 123:", data);
     } catch (err: any) {
       setError(err.message || "Failed to fetch vendors");
     } finally {
       setLoading(false);
     }
   };
+console.log("User Details 13:", userDetails);
+
+    const fetchVendorCategories = async () => {
+      setLoading(true);
+      try {
+        const payload = {
+          BusinessID: userDetails?.userDetails?.BusinessID?.toString() || '',
+        };
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorCategories`,
+          payload
+        );
+        setCategories(response.data || []);
+        console.log("Fetched vendor categories:", response.data);
+      } catch (error) {
+        console.error('Error fetching vendor categories:', error);
+        alert('Failed to fetch vendor categories.');
+      } finally {
+        setLoading(false);
+      }
+    };
+      useEffect(() => {
+        if (userDetails?.userDetails?.BusinessID) {
+          fetchVendorCategories();
+        }
+        // eslint-disable-next-line
+      }, [userDetails]);
+      
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -90,6 +132,7 @@ const Vendors: React.FC = () => {
       const json = await res.json();
       const data: Category[] = Array.isArray(json) ? json : json.categories || json.data || [];
       setCategories(data);
+      console.log("Fetched categories:", data);
     } catch (err) {
       console.error("Error fetching categories", err);
     }
@@ -248,7 +291,7 @@ const Vendors: React.FC = () => {
         </div>
         <div className="flex gap-3">
       {userDetails?.userDetails?.UserRole === 'owner' && (
-  <Button onClick={() => navigate("/add-vendor")}>
+  <Button onClick={() => navigate("/add-business-contact")} className="bg-blue-600 hover:bg-blue-700 text-white">
     Add Vendor
   </Button>
 )}
@@ -261,9 +304,9 @@ const Vendors: React.FC = () => {
       {error && <div className="text-center text-red-600 mt-8">{error}</div>}
 
       {/* Vendors list */}
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
   {!loading && vendors.length === 0 && (
-    <div className="text-center text-muted-foreground mt-8">No vendors found.</div>
+    <div className="text-center text-muted-foreground mt-8"></div>
   )}
 
   {[...vendors]
@@ -271,59 +314,94 @@ const Vendors: React.FC = () => {
     .map((vendor) => (
       <Card key={vendor.VendorID} className="hover:shadow-md transition">
         <CardContent className="p-4 space-y-2">
-          <div className="text-sm">
-            <strong>Name: </strong>
-            {vendor.Name}
+          <div className="text-2xl">
+            <strong>{vendor.Name}</strong>
+            
           </div>
-          <div className="text-sm">
+<div className="relative w-full">
+  {vendor.Status && (
+    <div
+      className={`absolute top-0 right-0 text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
+        vendor.Status.toLowerCase() === "active"
+          ? "bg-green-100 text-green-800"
+          : "bg-red-100 text-red-800"
+      }`}
+    >
+      {vendor.Status}
+    </div>
+  )}
+</div>
+
+
+          {/* <div className="text-sm">
             <strong>ID: </strong>
             {vendor.VendorID}
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-sm w-full">
-            <div className="min-w-0 break-words">
-              <strong>Category: </strong>{vendor.VendorCategory}
-            </div>
-            <div className="min-w-0 break-words">
-              <strong>ContactPerson: </strong>{vendor.ContactPerson}
-            </div>
-            <div className="min-w-0 break-words">
-              <strong>ContactNumber: </strong>{vendor.ContactNumber}
-            </div>
-            <div className="min-w-0 break-words">
-              <strong>Email: </strong>{vendor.Email}
-            </div>
-          </div>
 
-          <div className="w-full">
-            <strong>Address: </strong>{vendor.Address}
-          </div>
-          <div className="w-full">
-            <strong>Notes: </strong>{vendor.Notes || "N/A"}
-          </div>
+           <div className="min-w-0 break-words">
+  
+  <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+    {vendor.VendorType}
+  </span>
+</div>
+       <div className="flex flex-col gap-2 text-sm w-full">
+  {/* <div className="min-w-0 break-words">
+    {vendor.VendorContactID}
+  </div> */}
+  <div className="flex items-center gap-2 min-w-0 break-words">
+      <Phone className="w-4 h-4 text-gray-600" />
+      {vendor.MobileNo}
+  </div>
+<div className="flex items-center gap-2 min-w-0 break-words">
+  <Mail className="w-4 h-4 text-gray-600" />
+  <span>{vendor.EmailId}</span>
+</div>
 
-          <div className="flex justify-end space-x-2">
-            <IconButton
-              onClick={(e) => {
+  <div className="flex items-center gap-2 min-w-0 break-words">
+          <MapPin className="w-4 h-4 text-gray-600" />
+          <span>{vendor.Address}</span>
+  </div>
+  <div className="flex items-center gap-2 min-w-0 break-words">
+      <StickyNote className="w-4 h-4 text-gray-600" />
+      <span>{vendor.Notes || "N/A"}</span>
+  </div>
+
+</div>
+
+
+       
+          <div className="flex space-x-2 mt-2">
+    <div>
+      <button
+        
+        className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
+           onClick={(e) => {
                 e.stopPropagation();
-                openEditDialog(vendor);
+                navigate(`/vendors/edit/${vendor.VendorID}`)
               }}
-            >
-              <Edit className="w-4 h-4" />
-            </IconButton>
-            <IconButton
-              onClick={(e) => {
+      >
+        Edit
+      </button>
+    </div>
+    <div className="flex justify-end flex-1">
+      <button
+       onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteVendor(vendor.VendorID);
               }}
-            >
-              <Delete className="w-4 h-4" />
-            </IconButton>
-          </div>
+        className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px] text-center"
+      
+      >
+        Delete
+      </button>
+    </div>
+  </div>
         </CardContent>
       </Card>
     ))}
 </div>
+
 
 
       {/* Edit Dialog - mobile responsive */}
