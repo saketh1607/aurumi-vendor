@@ -22,6 +22,7 @@ import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { Edit, Delete } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 
+
 interface VendorCategory {
   CategoryID: number;
   CategoryName: string;
@@ -57,8 +58,8 @@ const VendorCategories: React.FC = () => {
       );
       setCategories(response.data || []);
     } catch (error) {
-      console.error('Error fetching vendor categories:', error);
-      alert('Failed to fetch vendor categories.');
+      console.error('Error fetching vendor serive:', error);
+      alert('Failed to fetch vendor service.');
     } finally {
       setLoading(false);
     }
@@ -174,11 +175,11 @@ const VendorCategories: React.FC = () => {
           <div className="back-button">
             <ChevronLeft onClick={() => navigate(-1)} className="rounded-circle" />
           </div>
-          <h1 className="text-2xl font-bold">Vendor Categories</h1>
+          <h1 className="text-2xl font-bold">Vendor ServiceType</h1>
         </div>
        
            {userDetails?.UserRole === 'owner' && (
-          <Button onClick={() => setIsDialogOpen(true)}>Add Category</Button>
+          <Button onClick={() => setIsDialogOpen(true)} className='custom-appbar'>Add ServiceType</Button>
         )}
       </div>
 
@@ -187,42 +188,58 @@ const VendorCategories: React.FC = () => {
 ) : categories.length === 0 ? (
   <div className="text-center text-muted-foreground">No vendor categories found</div>
 ) : (
-  <div className="grid grid-cols-1 gap-4">
-    {[...categories]
-      .sort((a, b) => b.CategoryID - a.CategoryID) // 🔽 Sort descending by ID
-      .map((category) => (
-        <Card key={category.CategoryID}>
-          <CardHeader>
-            <CardTitle className="text-sm">ID: {category.CategoryID}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-3 gap-4 text-sm w-full">
-              <div className="min-w-0 break-words text-black font-medium">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {[...categories]
+    .sort((a, b) => b.CategoryID - a.CategoryID)
+    .map((category) => (
+      <Card key={category.CategoryID}>
+        <CardContent className="p-4 space-y-2">
+          {/* Header with Name and Status */}
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="text-base font-semibold text-gray-900">
                 {category.CategoryName}
               </div>
-              <div className="min-w-0 break-words text-black font-medium">
-                {category.Description || 'No description'}
-              </div>
-              <div
-                className={`font-semibold ${
-                  category.IsActive ? 'text-green-600' : 'text-red-500'
-                }`}
-              >
-                {category.IsActive ? 'Active' : 'Inactive'}
+              <div className="text-sm text-gray-500">
+                ID: {category.CategoryID}
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="justify-end space-x-2">
-            <IconButton onClick={() => handleEditCategory(category)}>
-              <Edit />
-            </IconButton>
-            <IconButton onClick={() => handleDeleteCategory(category.CategoryID)}>
-              <Delete />
-            </IconButton>
-          </CardFooter>
-        </Card>
-      ))}
-  </div>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                category.IsActive
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-600'
+              }`}
+            >
+              {category.IsActive ? 'Active' : 'Inactive'}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="text-sm text-gray-700 italic border-t pt-2">
+            <span className="not-italic font-medium">Description:</span>{' '}
+            {category.Description || 'No description'}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center pt-4">
+            <button
+              onClick={() => handleEditCategory(category)}
+              className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDeleteCategory(category.CategoryID)}
+              className="px-4 py-1 rounded-md border text-sm font-medium text-red-600 hover:bg-red-50"
+            >
+              Delete
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+</div>
 )}
 
 
@@ -230,12 +247,12 @@ const VendorCategories: React.FC = () => {
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}</DialogTitle>
+            <DialogTitle>{isEditMode ? 'Edit Vendor Service' : 'Add Vendor Service'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddOrUpdateCategory} className="space-y-4" noValidate>
             <div className="space-y-1">
               <label htmlFor="CategoryName" className="text-sm font-medium text-gray-700">
-                Category Name<span className="text-red-500">*</span>
+                Service Type<span className="text-red-500">*</span>
               </label>
               <Input
                 id="CategoryName"
@@ -267,7 +284,7 @@ const VendorCategories: React.FC = () => {
               <Button type="button" variant="outline" className="custom-cancel-button" onClick={handleDialogClose}>
                 Cancel
               </Button>
-              <Button type="submit">{isEditMode ? 'Update' : 'Add'}</Button>
+              <Button type="submit" className='custom-appbar'>{isEditMode ? 'Update' : 'Add'}</Button>
             </div>
           </form>
         </DialogContent>

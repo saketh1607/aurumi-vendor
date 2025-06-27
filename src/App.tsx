@@ -17,6 +17,7 @@ import Vendors from "./pages/Vendors";
 import AddBusinessContact from "./pages/AddBusinessContact";
 import AddVendor from "./pages/AddVendor";
 import EditVendor from "./pages/EditVendor";
+import ExportDropdown from "./pages/ExportDropdown";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/add-business-contact" element={<AddBusinessContact />} />
               <Route path="/add-vendor-form" element={<AddVendor />} />
               <Route path="/vendors/edit/:id" element={<EditVendor />} />
+              <Route path="/export-dropdown" element={<ExportDropdown onExport={(format) => console.log(`Exporting as ${format}`)} />} />
             
             </Routes>
           </Layout>

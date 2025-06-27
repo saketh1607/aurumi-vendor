@@ -85,7 +85,7 @@ setDashboardSummary({
           icon={<FileText />}
          
         />
-        <StatCard title="Total Categories" value={dashboardSummary?.TotalCategories ?? 0} icon={<Package />} />
+        <StatCard title="Total ServiceType" value={dashboardSummary?.TotalCategories ?? 0} icon={<Package />} />
    
       </div>
 

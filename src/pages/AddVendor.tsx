@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
+import { useRef } from "react";
+
+
+
 
 const AddVendor = () => {
   const [formData, setFormData] = useState({
@@ -17,9 +21,36 @@ const AddVendor = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const userDetails = useContext(UserDetailsContext);
   const [categories, setCategories] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+const [showSuggestions, setShowSuggestions] = useState(false);
+const [vendorTypeSearchTerm, setVendorTypeSearchTerm] = useState("");
+const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false);
+  const serviceTypeRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        serviceTypeRef.current &&
+        !serviceTypeRef.current.contains(event.target as Node)
+      ) {
+        setShowVendorTypeSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+const filteredContacts = contacts.filter(contact =>
+  `${contact.FirstName} ${contact.LastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+const filteredVendorTypes = categories.filter(category =>
+  category.CategoryName.toLowerCase().includes(vendorTypeSearchTerm.toLowerCase())
+);
   // Fetch business contacts and categories
   useEffect(() => {
     const fetchContacts = async () => {
@@ -36,9 +67,13 @@ const AddVendor = () => {
         const contactList = Array.isArray(response.data) ? response.data : [];
         setContacts(contactList);
 
-        if (contactList.length > 0) {
+        // Only set latest contact if no contact is passed from navigation
+        if (
+          contactList.length > 0 &&
+          !location.state?.contact
+        ) {
           const sorted = [...contactList].sort((a, b) => Number(b.ContactID) - Number(a.ContactID));
-const latest = sorted[0];
+          const latest = sorted[0];
 
           setFormData((prev) => ({
             ...prev,
@@ -46,8 +81,6 @@ const latest = sorted[0];
           }));
           setSelectedContact(latest);
         }
-
-        console.log("Fetched contacts:", contactList);
       } catch (error) {
         console.error("Error fetching business contacts:", error);
       }
@@ -75,7 +108,18 @@ const latest = sorted[0];
       fetchContacts();
       fetchCategories();
     }
-  }, [userDetails]);
+  }, [userDetails, location.state]);
+
+  useEffect(() => {
+    if (location.state?.contact) {
+      setSelectedContact(location.state.contact);
+      setFormData((prev) => ({
+        ...prev,
+        ContactID: location.state.contact.ContactID,
+      }));
+      setSearchTerm(`${location.state.contact.FirstName} ${location.state.contact.LastName}`);
+    }
+  }, [location.state]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -128,7 +172,7 @@ const latest = sorted[0];
       setLoading(false);
     }
   };
-
+const accountID = userDetails?.userDetails?.AccountID || "";
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-1">Add Vendor Details</h2>
@@ -142,58 +186,98 @@ const latest = sorted[0];
             <h3 className="text-base font-semibold text-gray-800 mb-2">Contact Information</h3>
             <div className="grid grid-cols-2 gap-y-2 gap-x-8 text-sm text-gray-700">
               <div>
-                <span className="font-medium">BusinessName:</span> {selectedContact.BusinessName}
+                <span className="font-semibold">BusinessName:</span> {selectedContact.BusinessName}
               </div>
               <div>
-                <span className="font-medium">Contact:</span>{" "}
+                <span className="font-semibold">Contact:</span>{" "}
                 {selectedContact.FirstName} {selectedContact.LastName}
               </div>
-              {/* <div>
-                <span className="font-medium">Email:</span> {selectedContact.Email || "—"}
-              </div> */}
               <div>
-                <span className="font-medium">Phone:</span> {selectedContact.MobileNo}
+                <span className="font-semibold">Email:</span> {selectedContact.EmailID || "—"}
+              </div>
+              <div>
+                <span className="font-semibold">Phone:</span> {selectedContact.MobileNo}
               </div>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Contact</label>
-            <select
-              name="ContactID"
-              value={formData.ContactID}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded text-sm"
-            >
-              <option value="">Select Contact</option>
-              {contacts.map((contact) => (
-                <option key={contact.ContactID} value={contact.ContactID}>
-                  {contact.FirstName} {contact.LastName}
-                </option>
-              ))}
-            </select>
-          </div> */}
+        {/* <div className="relative">
+  <label className="block text-sm font-medium text-gray-700 mb-1">Select Contact</label>
+  <input
+    type="text"
+    value={searchTerm}
+    onChange={(e) => {
+      setSearchTerm(e.target.value);
+      setShowSuggestions(true);
+    }}
+    onFocus={() => setShowSuggestions(true)}
+    placeholder="Type to search contacts"
+    className="w-full border px-3 py-2 rounded text-sm"
+  />
+  
+  {showSuggestions && (
+    <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
+      {filteredContacts.length > 0 ? (
+        filteredContacts.map((contact) => (
+          <li
+            key={contact.ContactID}
+            onClick={() => {
+              setFormData({ ...formData, ContactID: contact.ContactID });
+              setSearchTerm(`${contact.FirstName} ${contact.LastName}`);
+              setShowSuggestions(false);
+            }}
+            className="px-3 py-2 cursor-pointer hover:bg-blue-100 text-sm"
+          >
+            {contact.FirstName} {contact.LastName}
+          </li>
+        ))
+      ) : (
+        <li className="px-3 py-2 text-sm text-gray-500">No contacts found</li>
+      )}
+    </ul>
+  )}
+</div> */}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Vendor Type *</label>
-            <select
-              name="VendorType"
-              value={formData.VendorType}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded text-sm"
-            >
-              <option value="">Select service type </option>
-              {categories.map((category) => (
-                <option key={category.CategoryID} value={category.CategoryName}>
-                  {category.CategoryName}
-                </option>
-              ))}
-            </select>
-          </div>
+
+        <div className="relative" ref={serviceTypeRef}>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Service Type *</label>
+      <input
+        type="text"
+        value={vendorTypeSearchTerm}
+        onChange={(e) => {
+          setVendorTypeSearchTerm(e.target.value);
+          setShowVendorTypeSuggestions(true);
+        }}
+        onFocus={() => setShowVendorTypeSuggestions(true)}
+        placeholder="Type to search vendor type"
+        className="w-full border px-3 py-2 rounded text-sm"
+        required
+      />
+
+      {showVendorTypeSuggestions && (
+        <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
+          {filteredVendorTypes.length > 0 ? (
+            filteredVendorTypes.map((category) => (
+              <li
+                key={category.CategoryID}
+                onClick={() => {
+                  setFormData({ ...formData, VendorType: category.CategoryName });
+                  setVendorTypeSearchTerm(category.CategoryName);
+                  setShowVendorTypeSuggestions(false);
+                }}
+                className="px-3 py-2 cursor-pointer hover:bg-blue-100 text-sm"
+              >
+                {category.CategoryName}
+              </li>
+            ))
+          ) : (
+            <li className="px-3 py-2 text-sm text-gray-500">No vendor types found</li>
+          )}
+        </ul>
+      )}
+    </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
@@ -248,13 +332,13 @@ const latest = sorted[0];
             <button
               type="submit"
               disabled={loading}
-              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 text-sm"
+              className="custom-appbar text-white py-2 px-4 rounded hover:bg-green-700 text-sm"
             >
               {loading ? "Submitting..." : "Complete Registration"}
             </button>
             <button
               type="button"
-              onClick={() => navigate("/vendors")}
+                onClick={() => navigate(`/vendors`)}
               className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-100 custom-cancel-button"
             >
               Cancel

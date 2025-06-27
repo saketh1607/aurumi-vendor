@@ -3,6 +3,8 @@ import axios from "axios";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+
 
 const AddBusinessContact = () => {
   const [formData, setFormData] = useState({
@@ -18,14 +20,38 @@ const AddBusinessContact = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-const userDetails= useContext(UserDetailsContext);
-console.log("userDetails", userDetails);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const userDetails= useContext(UserDetailsContext);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const filteredContacts = contacts.filter(contact =>
+  `${contact.FirstName} ${contact.LastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+);
+    const [selectedContact, setSelectedContact] = useState<any | null>(null);
+
+console.log("userDetails 123", userDetails);
 const navigate = useNavigate();
   const handleClick = () => {
     if (!loading) {
       navigate("/add-vendor");
     }
   };
+    useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   
 
   // Autofill values from userDetails
@@ -38,6 +64,45 @@ const navigate = useNavigate();
       }));
     }
   }, [userDetails]);
+  useEffect(() => {
+      const fetchContacts = async () => {
+        try {
+          const payload = {
+            BusinessID: userDetails?.userDetails?.BusinessID?.toString() || "",
+          };
+  
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/Contacts/GetBusinessContacts`,
+            payload
+          );
+  
+          const contactList = Array.isArray(response.data) ? response.data : [];
+          setContacts(contactList);
+  
+          if (contactList.length > 0) {
+            const sorted = [...contactList].sort((a, b) => Number(b.ContactID) - Number(a.ContactID));
+  const latest = sorted[0];
+  
+            setFormData((prev) => ({
+              ...prev,
+              ContactID: latest.ContactID,
+            }));
+          }
+  
+          console.log("Fetched contacts rjjfkdk:", contactList);
+        } catch (error) {
+          console.error("Error fetching business contacts:", error);
+        }
+      };
+  
+  
+  
+      if (userDetails?.userDetails?.BusinessID) {
+        fetchContacts();
+        
+      }
+    }, [userDetails]);
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -131,7 +196,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-
+const accountId = userDetails?.userDetails?.AccountID || "";
 
   return (
 
@@ -142,6 +207,65 @@ const handleSubmit = async (e: React.FormEvent) => {
     <p className="text-sm text-gray-500 mb-6">Step 1 of 2: Basic contact details</p>
 
     <form onSubmit={handleSubmit} className="space-y-6">
+       {selectedContact && (
+          <div className="bg-gray-100 border rounded-lg p-6 mb-2">
+            <h3 className="text-base font-semibold text-gray-800 mb-2">Contact Information</h3>
+            <div className="grid grid-cols-2 gap-y-2 gap-x-8 text-sm text-gray-700">
+              <div>
+                <span className="font-semibold">BusinessName:</span> {selectedContact.BusinessName}
+              </div>
+              <div>
+                <span className="font-semibold">Contact:</span>{" "}
+                {selectedContact.FirstName} {selectedContact.LastName}
+              </div>
+              <div>
+                <span className="font-semibold">Email:</span> {selectedContact.EmailID || "—"}
+              </div>
+              <div>
+                <span className="font-semibold">Phone:</span> {selectedContact.MobileNo}
+              </div>
+            </div>
+          </div>
+        )}
+          <div className="relative" ref={wrapperRef}>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Select Contact</label>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setShowSuggestions(true);
+        }}
+        onFocus={() => setShowSuggestions(true)}
+        placeholder="Type to search contacts"
+        className="w-full border px-3 py-2 rounded text-sm"
+      />
+
+      {showSuggestions && (
+        <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
+          {filteredContacts.length > 0 ? (
+            filteredContacts.map((contact) => (
+              <li
+                key={contact.ContactID}
+                onClick={() => {
+                  setFormData({ ...formData, ContactID: contact.ContactID });
+                  setSelectedContact(contact);
+                  setSearchTerm(`${contact.FirstName} ${contact.LastName}`);
+                  setShowSuggestions(false);
+                  navigate("/add-vendor-form", { state: { contact } });
+                }}
+                className="px-3 py-2 cursor-pointer hover:bg-blue-100 text-sm"
+              >
+                {contact.FirstName} {contact.LastName}
+              </li>
+            ))
+          ) : (
+            <li className="px-3 py-2 text-sm text-gray-500">No contacts found</li>
+          )}
+        </ul>
+      )}
+    </div>
+  
 
       {/* Row 1: First Name + Last Name */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,14 +358,14 @@ const handleSubmit = async (e: React.FormEvent) => {
           <button
           type="button"
           className="border border-gray-300 text-gray-700 px-5 py-2 rounded hover:bg-gray-100 transition custom-cancel-button"
-          onClick={() => navigate('/vendors')}
+            onClick={() => navigate(`/vendors`)}
         >
           Cancel
         </button>
       <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          className="custom-appbar text-white py-2 px-4 rounded hover:bg-blue-700"
         >
           {loading ? "Submitting..." : "Next: Vendor Details"}
         </button>

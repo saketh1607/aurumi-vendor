@@ -10,6 +10,7 @@ import { IconButton } from '@mui/material';
 import axios from "axios";
 import { Mail, Phone,MapPin, StickyNote } from 'lucide-react';
   import { useParams } from "react-router-dom";
+  import AddBusinessContact from "./AddBusinessContact";
 interface Vendor {
   VendorID: number;
   Name: string;
@@ -47,6 +48,9 @@ const Vendors: React.FC = () => {
   const navigate = useNavigate();
   const { users } = useAppContext();
   const userDetails = useContext(UserDetailsContext);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  
   console.log("User Details 123:", userDetails);
 
 
@@ -57,7 +61,7 @@ const { id: VendorID } = useParams();
 
   // Fetch vendors
   const fetchVendors = async () => {
-    if (!userDetails?.userDetails.BusinessID) return;
+    if (!userDetails) return;
     setLoading(true);
     setError(null);
     try {
@@ -111,11 +115,16 @@ console.log("User Details 13:", userDetails);
         }
         // eslint-disable-next-line
       }, [userDetails]);
+
+      const filteredVendors = vendors.filter(vendor =>
+  vendor.Name.toLowerCase().includes(searchQuery.toLowerCase())
+);
+
       
 
   // Fetch categories
   const fetchCategories = async () => {
-    if (!userDetails?.userDetails.BusinessID) return;
+    if (!userDetails) return;
     try {
       const res = await fetch(`${API_BASE}/purchases/GetVendorCategories`, {
         method: "POST",
@@ -124,7 +133,7 @@ console.log("User Details 13:", userDetails);
           accept: "application/json",
         },
         body: JSON.stringify({
-          BusinessID: String(userDetails?.userDetails.BusinessID),
+          BusinessID: String(userDetails?.userDetails?.BusinessID),
         }),
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -134,16 +143,16 @@ console.log("User Details 13:", userDetails);
       setCategories(data);
       console.log("Fetched categories:", data);
     } catch (err) {
-      console.error("Error fetching categories", err);
+      console.error("Error fetching categories");
     }
   };
 
   useEffect(() => {
-    if (userDetails?.userDetails.BusinessID) {
+    if (userDetails) {
       fetchVendors();
       fetchCategories();
     }
-  }, [userDetails?.userDetails.BusinessID]);
+  }, [userDetails]);
 
   const handleDeleteVendor = async (vendorID: number) => {
     if (!window.confirm("Are you sure you want to delete this vendor?")) return;
@@ -180,7 +189,7 @@ console.log("User Details 13:", userDetails);
       VendorID: vendor.VendorID,
       Name: vendor.Name ?? "",
       CategoryID: foundCategory ? foundCategory.CategoryID : (vendor.CategoryID ?? ""),
-      VendorCategory: vendor.VendorCategory ?? "",
+      VendorCategory: vendor.VendorCategory ?? "", // This is the name
       ContactNumber: vendor.ContactNumber ?? "",
       Email: vendor.Email ?? "",
       ContactPerson: vendor.ContactPerson ?? "",
@@ -284,123 +293,131 @@ console.log("User Details 13:", userDetails);
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center">
-          {/* <div className="back-button "> */}
-            {/* <ChevronLeft onClick={() => navigate(-1)} className="rounded-circle" /> */}
-          {/* </div> */}
           <h1 className="text-2xl font-bold">Manage Vendors</h1>
         </div>
         <div className="flex gap-3">
-      {userDetails?.userDetails?.UserRole === 'owner' && (
-  <Button onClick={() => navigate("/add-business-contact")} className="bg-blue-600 hover:bg-blue-700 text-white">
-    Add Vendor
-  </Button>
-)}
-          <Button onClick={() => navigate("/vendor-categories")}>Manage Categories</Button>
+          {userDetails?.userDetails?.UserRole === 'owner' && (
+            <Button onClick={() => navigate("/add-business-contact")} className="custom-appbar text-white">
+              Add Vendor
+            </Button>
+          )}
+          <Button onClick={() => navigate("/vendor-categories")} className="custom-appbar">Manage ServiceType</Button>
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="my-4">
+        <input
+          type="text"
+          placeholder="Search vendor by name..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="pl-10 w-full py-2 border border-gray-300 rounded-md"
+        />
+      </div>
+  
       {/* Loading & error */}
       {loading && <div className="text-center text-muted-foreground mt-8">Loading vendors...</div>}
       {error && <div className="text-center text-red-600 mt-8">{error}</div>}
 
       {/* Vendors list */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-  {!loading && vendors.length === 0 && (
-    <div className="text-center text-muted-foreground mt-8"></div>
-  )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {!loading && filteredVendors.length === 0 && (
+          <div className="text-center text-muted-foreground mt-8"></div>
+        )}
 
-  {[...vendors]
-    .sort((a, b) => b.VendorID - a.VendorID) // 🔽 Descending sort
-    .map((vendor) => (
-      <Card key={vendor.VendorID} className="hover:shadow-md transition">
-        <CardContent className="p-4 space-y-2">
-          <div className="text-2xl">
-            <strong>{vendor.Name}</strong>
-            
-          </div>
-<div className="relative w-full">
-  {vendor.Status && (
-    <div
-      className={`absolute top-0 right-0 text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
-        vendor.Status.toLowerCase() === "active"
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
-      }`}
-    >
-      {vendor.Status}
+        {[...filteredVendors]
+          .sort((a, b) => b.VendorID - a.VendorID)
+          .map((vendor) => (
+            <Card key={vendor.VendorID} className="hover:shadow-md transition">
+              <CardContent className="p-4 space-y-2">
+                <div className="text-2xl">
+                  <strong>{vendor.Name}</strong>
+                  
+                </div>
+    <div className="relative w-full">
+      {vendor.Status && (
+        <div
+          className={`absolute top-0 right-0 text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
+            vendor.Status.toLowerCase() === "active"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {vendor.Status}
+        </div>
+      )}
     </div>
-  )}
-</div>
 
 
-          {/* <div className="text-sm">
-            <strong>ID: </strong>
-            {vendor.VendorID}
-          </div> */}
+                {/* <div className="text-sm">
+                  <strong>ID: </strong>
+                  {vendor.VendorID}
+                </div> */}
 
 
-           <div className="min-w-0 break-words">
-  
-  <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
-    {vendor.VendorType}
-  </span>
-</div>
-       <div className="flex flex-col gap-2 text-sm w-full">
-  {/* <div className="min-w-0 break-words">
-    {vendor.VendorContactID}
-  </div> */}
-  <div className="flex items-center gap-2 min-w-0 break-words">
-      <Phone className="w-4 h-4 text-gray-600" />
-      {vendor.MobileNo}
+                 <div className="min-w-0 break-words">
+    
+    <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+      {vendor.VendorType}
+    </span>
   </div>
+         <div className="flex flex-col gap-2 text-sm w-full">
+    {/* <div className="min-w-0 break-words">
+      {vendor.VendorContactID}
+    </div> */}
+    <div className="flex items-center gap-2 min-w-0 break-words">
+        <Phone className="w-4 h-4 text-gray-600" />
+        {vendor.MobileNo}
+    </div>
 <div className="flex items-center gap-2 min-w-0 break-words">
   <Mail className="w-4 h-4 text-gray-600" />
   <span>{vendor.EmailId}</span>
 </div>
 
-  <div className="flex items-center gap-2 min-w-0 break-words">
-          <MapPin className="w-4 h-4 text-gray-600" />
-          <span>{vendor.Address}</span>
-  </div>
-  <div className="flex items-center gap-2 min-w-0 break-words">
-      <StickyNote className="w-4 h-4 text-gray-600" />
-      <span>{vendor.Notes || "N/A"}</span>
-  </div>
-
+<div className="flex items-center gap-2 min-w-0 break-words">
+        <MapPin className="w-4 h-4 text-gray-600" />
+        <span>{vendor.Address}</span>
+    </div>
+    <div className="flex items-center gap-2 break-words">
+  <StickyNote className="w-4 h-4 text-gray-600 shrink-0" />
+  <span>{vendor.Notes || "N/A"}</span>
 </div>
 
 
-       
-          <div className="flex space-x-2 mt-2">
-    <div>
-      <button
+  </div>
+
+
+         
+                <div className="flex space-x-2 mt-2">
+      <div>
+        <button
+          className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
+          }}
+        >
+          Edit
+        </button>
+      </div>
+      <div className="flex justify-end flex-1">
+        {/* <button
+         onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteVendor(vendor.VendorID);
+                }}
+          className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px] text-center"
         
-        className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
-           onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/vendors/edit/${vendor.VendorID}`)
-              }}
-      >
-        Edit
-      </button>
+        >
+          Delete
+        </button> */}
+      </div>
     </div>
-    <div className="flex justify-end flex-1">
-      <button
-       onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteVendor(vendor.VendorID);
-              }}
-        className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px] text-center"
-      
-      >
-        Delete
-      </button>
-    </div>
-  </div>
-        </CardContent>
-      </Card>
-    ))}
-</div>
+              </CardContent>
+            </Card>
+          ))}
+      </div>
 
 
 

@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const allNavLinks = [
     { to: '/', label: 'Dashboard', icon: <Home size={20} /> },
-    { to: '/vendors', label: 'Vendors', icon: <Store size={20} /> }
+    { to:  `/vendors`, label: 'Vendors', icon: <Store size={20} /> }
       // { to: '/vendors', label: 'Vendors', icon: <img src="/icon.png" alt="Vendors" className="w-5 h-5" /> }
       // { to: '/requisitions', label: 'Requisitions', icon: <FileText size={20} /> },
     // { to: '/approvals', label: 'Approvals', icon: <CheckSquare size={20} /> },

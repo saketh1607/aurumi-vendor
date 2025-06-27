@@ -1,76 +1,87 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
 
 const EditVendor = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const userDetails = useContext(UserDetailsContext);
+  const serviceTypeRef = useRef<HTMLDivElement>(null);
+
   const [formData, setFormData] = useState({
     VendorID: "",
     Address: "",
     VendorType: "",
     Status: "Active",
     Notes: "",
-    ContactID: "", // Added this to hold matched contact ID
+    ContactID: "",
   });
 
-  const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [contacts, setContacts] = useState<any[]>([]);
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [categories, setCategories] = useState<any[]>([]); // hardcoded list
 
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const userDetails = useContext(UserDetailsContext);
+  // Get vendor from location.state
+  const vendor = location.state?.vendor;
 
-  // Fetch contacts
- useEffect(() => {
-  const fetchAll = async () => {
-    const businessID = userDetails?.userDetails?.BusinessID?.toString();
-    if (!businessID || !id) return;
+  useEffect(() => {
+    const fetchContacts = async () => {
+      const businessID = userDetails?.userDetails?.BusinessID?.toString();
+      if (!businessID || !vendor) return;
 
-    try {
-      const payload = { BusinessID: businessID };
+      try {
+        const payload = { BusinessID: businessID };
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/Contacts/GetBusinessContacts`,
+          payload
+        );
 
-      const [contactsRes, categoriesRes, vendorsRes] = await Promise.all([
-        axios.post(`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/Contacts/GetBusinessContacts`, payload),
-        axios.post(`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorCategories`, payload),
-        axios.post(`${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorsList`, payload),
-      ]);
+        const contactsData = Array.isArray(response.data) ? response.data : [];
+        setContacts(contactsData);
 
-      const contactsData = Array.isArray(contactsRes.data) ? contactsRes.data : [];
-      const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : [];
-      const vendorsData = Array.isArray(vendorsRes.data) ? vendorsRes.data : [];
-
-      setContacts(contactsData);
-      setCategories(categoriesData);
-
-      const vendor = vendorsData.find((v) => v.VendorID?.toString() === id);
-      if (vendor) {
-        setFormData({
-          VendorID: vendor.VendorID || "",
-          Address: vendor.Address || "",
-          VendorType: vendor.VendorType || "",
-          Status: vendor.Status || "Active",
-          Notes: vendor.Notes || "",
-          ContactID: vendor.VendorContactID || "",
-        });
-
-        const matchedContact = contactsData.find(c => c.ContactID === vendor.VendorContactID);
-        if (matchedContact) {
-          setSelectedContact(matchedContact);
-        }
+        const matchedContact = contactsData.find(
+          (c) => c.ContactID === vendor.VendorContactID
+        );
+        setSelectedContact(matchedContact || null);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
       }
+    };
 
-    } catch (error) {
-      console.error("Error loading vendor data:", error);
+    if (vendor) {
+      setFormData({
+        VendorID: vendor.VendorID || "",
+        Address: vendor.Address || "",
+        VendorType: vendor.VendorType || "",
+        Status: vendor.Status || "Active",
+        Notes: vendor.Notes || "",
+        ContactID: vendor.VendorContactID || "",
+      });
     }
-  };
 
-  fetchAll();
-}, [id, userDetails]);
+    fetchContacts();
+  }, [vendor, userDetails]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        serviceTypeRef.current &&
+        !serviceTypeRef.current.contains(event.target as Node)
+      ) {
+        // logic if needed
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -82,12 +93,12 @@ const EditVendor = () => {
 
     try {
       const payload = {
-        VendorID: formData.VendorID?.toString(),
-        Address: formData.Address?.toString(),
-        VendorType: formData.VendorType?.toString(),
-        Status: formData.Status?.toString(),
+        VendorID: formData.VendorID?.toString() || "",
+        Address: formData.Address?.toString() || "",
+        VendorType: formData.VendorType?.toString() || "",
+        Status: formData.Status?.toString() || "",
         Notes: formData.Notes?.toString() || "",
-        ContactID: formData.ContactID || "", // Include if required by API
+        ContactID: formData.ContactID?.toString() || "",
       };
 
       await axios.post(
@@ -105,25 +116,90 @@ const EditVendor = () => {
     }
   };
 
+  if (!vendor) {
+    return (
+      <div className="text-center p-8 text-red-600 font-semibold">
+        No vendor data provided.
+      </div>
+    );
+  }
+  console.log("abc", formData);
+  console.log("VendorType in formData:", formData.VendorType);
+  // console.log("userDetails bbb:", userDetails);
+  const API_BASE = import.meta.env.VITE_API_URL + import.meta.env.VITE_PORTNO;
+
+  const fetchCategories = async () => {
+    if (!userDetails?.userDetails.BusinessID) return;
+    try {
+      const res = await fetch(`${API_BASE}/purchases/GetVendorCategories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({
+          BusinessID: String(userDetails?.userDetails.BusinessID),
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+      const json = await res.json();
+      const data =
+        Array.isArray(json) || json.categories || json.data
+          ? json
+          : json.categories || json.data || [];
+      setCategories(data);
+      console.log("Fetched categories:", data);
+    } catch (err) {
+      console.error("Error fetching categories", err);
+    }
+  };
+
+  useEffect(() => {
+    if (userDetails) {
+      fetchCategories();
+    }
+  }, [userDetails]);
+
+  const normalizedVendorType = (formData.VendorType || "")
+    .trim()
+    .toLowerCase();
+  const allCategories =
+    categories.includes(formData.VendorType) && formData.VendorType
+      ? categories
+      : formData.VendorType
+      ? [formData.VendorType, ...categories]
+      : categories;
+const accounytID = userDetails?.userDetails?.AccountID || "";
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-1">Edit Vendor</h2>
-      <p className="text-sm text-gray-600 mb-6">Modify vendor details and click update.</p>
+      <p className="text-sm text-gray-600 mb-6">
+        Modify vendor details and click update.
+      </p>
 
       <form onSubmit={handleUpdate} className="flex flex-col gap-4">
         {selectedContact && (
           <div className="bg-gray-100 border rounded-lg p-6 mb-2">
-            <h3 className="text-base font-semibold text-gray-800 mb-2">Contact Information</h3>
+            <h3 className="text-base font-semibold text-gray-800 mb-2">
+              Contact Information
+            </h3>
             <div className="grid grid-cols-2 gap-y-2 gap-x-8 text-sm text-gray-700">
               <div>
-                <span className="font-medium">BusinessName:</span> {selectedContact.BusinessName}
+                <span className="font-semibold">BusinessName:</span>{" "}
+                {selectedContact.BusinessName}
               </div>
               <div>
-                <span className="font-medium">Contact:</span>{" "}
+                <span className="font-semibold">Contact:</span>{" "}
                 {selectedContact.FirstName} {selectedContact.LastName}
               </div>
               <div>
-                <span className="font-medium">Phone:</span> {selectedContact.MobileNo}
+                <span className="font-semibold">Email:</span>{" "}
+                {selectedContact.EmailID || "—"}
+              </div>
+              <div>
+                <span className="font-semibold">Phone:</span>{" "}
+                {selectedContact.MobileNo}
               </div>
             </div>
           </div>
@@ -131,7 +207,9 @@ const EditVendor = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Service Type *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Service Type *
+            </label>
             <select
               name="VendorType"
               value={formData.VendorType}
@@ -139,17 +217,19 @@ const EditVendor = () => {
               required
               className="w-full border px-3 py-2 rounded text-sm"
             >
-              <option value="">Select service type</option>
-              {categories.map((category) => (
-                <option key={category.CategoryID} value={category.CategoryName}>
-                  {category.CategoryName}
+              <option value="">Select Service Type</option>
+              {categories.map((cat: any) => (
+                <option key={cat.CategoryID} value={cat.CategoryName}>
+                  {cat.CategoryName}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
             <select
               name="Status"
               value={formData.Status}
@@ -162,7 +242,9 @@ const EditVendor = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Address
+            </label>
             <input
               type="text"
               name="Address"
@@ -174,7 +256,9 @@ const EditVendor = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Notes
+          </label>
           <textarea
             name="Notes"
             value={formData.Notes}
@@ -187,15 +271,15 @@ const EditVendor = () => {
         <div className="flex justify-between items-center pt-4">
           <button
             type="button"
-            onClick={() => navigate("/vendors")}
-            className="px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100 custom-cancel-button"
+            onClick={() => navigate(`/vendors`)}
+            className="px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 text-sm"
+            className="custom-appbar text-white py-2 px-4 rounded hover:bg-green-700 text-sm"
           >
             {loading ? "Submitting..." : "Update Vendor"}
           </button>
