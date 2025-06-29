@@ -49,6 +49,10 @@ const Vendors: React.FC = () => {
   const { users } = useAppContext();
   const userDetails = useContext(UserDetailsContext);
   const [searchQuery, setSearchQuery] = useState("");
+  const queryParams = new URLSearchParams(location.search);
+  const accountId = queryParams.get('account_id');
+  const buildPOUrl = (path: string) =>
+  accountId ? `${path}?account_id=${accountId}` : path;
 
   
   console.log("User Details 123:", userDetails);
@@ -88,7 +92,7 @@ const { id: VendorID } = useParams();
       setLoading(false);
     }
   };
-console.log("User Details 13:", userDetails);
+
 
     const fetchVendorCategories = async () => {
       setLoading(true);
@@ -110,7 +114,7 @@ console.log("User Details 13:", userDetails);
       }
     };
       useEffect(() => {
-        if (userDetails?.userDetails?.BusinessID) {
+        if (userDetails) {
           fetchVendorCategories();
         }
         // eslint-disable-next-line

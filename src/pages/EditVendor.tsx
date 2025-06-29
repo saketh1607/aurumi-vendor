@@ -8,6 +8,10 @@ const EditVendor = () => {
   const navigate = useNavigate();
   const userDetails = useContext(UserDetailsContext);
   const serviceTypeRef = useRef<HTMLDivElement>(null);
+  const queryParams = new URLSearchParams(location.search);
+  const accountId = queryParams.get('account_id');
+  const buildPOUrl = (path: string) =>
+  accountId ? `${path}?account_id=${accountId}` : path;
 
   const [formData, setFormData] = useState({
     VendorID: "",
@@ -271,8 +275,9 @@ const accounytID = userDetails?.userDetails?.AccountID || "";
         <div className="flex justify-between items-center pt-4">
           <button
             type="button"
-            onClick={() => navigate(`/vendors`)}
-            className="px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100"
+            
+            onClick={() => navigate(buildPOUrl(`/vendors`))}
+            className=" custom-cancel-button px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100"
           >
             Cancel
           </button>

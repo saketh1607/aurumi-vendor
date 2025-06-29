@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useLocation } from "react-router-dom";
 
-// Define the shape of userDetails if known more specifically
+
 interface UserDetails {
   TeamContactID: string;
   BusinessID: string;

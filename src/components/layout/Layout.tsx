@@ -37,9 +37,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   {/* Sticky Container for both navbars */}
   <div className="position-sticky top-0" style={{ zIndex: 1030 }}>
     {/* Top Navbar */}
-    <nav className="navbar navbar-dark bg-primary px-3">
-      <span className="navbar-brand mb-0 h1">Vendors Management</span>
-    </nav>
+ <nav className="navbar navbar-dark bg-primary px-3">
+  <div className="d-flex align-items-center">
+   <img
+  src="/AurumiLogo.png"
+  alt="Aurumi Logo"
+  width="28"
+  height="28"
+  className="me-2 rounded-circle"
+/>
+    <span className="navbar-brand mb-0 h1">Vendors Management</span>
+  </div>
+</nav>
+
+
 
     {/* Horizontal Nav Links */}
     <div className="bg-light border-bottom shadow-sm">
