@@ -34,6 +34,10 @@ const [inputValue, setInputValue] = useState('');
   const [categories, setCategories] = useState<VendorCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryParams = new URLSearchParams(location.search);
+  const accountId = queryParams.get('account_id');
+  const buildPOUrl = (path: string) =>
+  accountId ? `${path}?account_id=${accountId}` : path;
 
   // Validation state
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -259,7 +263,7 @@ const [inputValue, setInputValue] = useState('');
                 variant="outline"
                 className="custom-cancel-button"
                 type="button"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate(buildPOUrl(`/vendors${accountId ? `?account_id=${accountId}` : ''}`))}
               >
                 Cancel
               </Button>

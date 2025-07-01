@@ -25,14 +25,14 @@ const ExportDropdown: React.FC<ExportDropdownProps> = ({ onExport }) => {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="pdf">PDF</SelectItem>
-          <SelectItem value="csv">CSV</SelectItem>
-          <SelectItem value="xlsx">XLSX</SelectItem>
+          <SelectItem className="custom-outline-select-item" value="pdf">PDF</SelectItem>
+          <SelectItem className="custom-outline-select-item" value="csv">CSV</SelectItem>
+          <SelectItem className="custom-outline-select-item" value="xlsx">XLSX</SelectItem>
         </SelectContent>
       </Select>
       <Button
         onClick={() => onExport(format)}
-        className="flex items-center gap-1"
+        className="custom-csv-button"
         variant="outline"
         type="button"
       >

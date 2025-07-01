@@ -11,6 +11,21 @@ import axios from "axios";
 import { Mail, Phone,MapPin, StickyNote } from 'lucide-react';
   import { useParams } from "react-router-dom";
   import AddBusinessContact from "./AddBusinessContact";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { useRef } from "react";
+import { Download } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"; // Adjust import path as needed
+import ExportDropdown from './ExportDropdown';
+
+import { CSVLink } from "react-csv";
 interface Vendor {
   VendorID: number;
   Name: string;
@@ -45,6 +60,8 @@ const Vendors: React.FC = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deletingVendorId, setDeletingVendorId] = useState<number | null>(null);
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [format, setFormat] = useState<"pdf" | "csv" | "xlsx">("pdf");
   const navigate = useNavigate();
   const { users } = useAppContext();
   const userDetails = useContext(UserDetailsContext);
@@ -62,9 +79,11 @@ const { id: VendorID } = useParams();
 
 
   const API_BASE = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
+ 
 
   // Fetch vendors
   const fetchVendors = async () => {
+     const BusinessId=userDetails?.userDetails.BusinessID;
     if (!userDetails) return;
     setLoading(true);
     setError(null);
@@ -76,7 +95,7 @@ const { id: VendorID } = useParams();
           accept: "application/json",
         },
         body: JSON.stringify({
-          BusinessID: String(userDetails?.userDetails.BusinessID),
+          BusinessID: String(BusinessId),
         }),
       });
 
@@ -87,7 +106,7 @@ const { id: VendorID } = useParams();
       setVendors(data);
       console.log("Fetched vendors 123:", data);
     } catch (err: any) {
-      setError(err.message || "Failed to fetch vendors");
+      setError( "Failed to fetch vendors");
     } finally {
       setLoading(false);
     }
@@ -292,16 +311,108 @@ const { id: VendorID } = useParams();
     return found ? found.CategoryName : "";
   };
 
+  const handleExport = (type: "csv" | "pdf" | "xlsx") => {
+    if (!vendors || vendors.length === 0) return;
+  
+    // Prepare export data (remove Category and Contact Person, use correct API fields)
+    const exportData = vendors.map(vendor => ({
+      "Vendor ID": vendor.VendorID,
+      "Vendor Name": vendor.Name,
+      "Contact Number": vendor.MobileNo || vendor.ContactNumber || "",
+      "Email": vendor.EmailId || vendor.Email || "",
+      "Address": vendor.Address,
+      "Notes": vendor.Notes,
+      "Status": vendor.Status,
+      "Service Type": vendor.VendorType,
+    }));
+  
+    if (type === "csv" || type === "xlsx") {
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Vendors");
+      XLSX.writeFile(wb, `vendors.${type === "csv" ? "csv" : "xlsx"}`);
+    } else if (type === "pdf") {
+      if (!exportData.length) {
+        alert("No data to export.");
+        return;
+      }
+       const doc = new jsPDF();
+  doc.text("Vendors", 14, 16); 
+  autoTable(doc, {
+    startY: 22,
+    head: [Object.keys(exportData[0])],
+    body: exportData.map(obj => Object.values(obj)),
+    styles: { fontSize: 8 },
+    margin: { left: 14, right: 14 },
+  });
+      doc.save("vendors.pdf");
+    }
+    setShowExportDropdown(false);
+  };
+  
+
   return (
     <div className="space-y-4 px-2 sm:px-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Manage Vendors</h1>
+         
+    {/* <Button
+      onClick={() => setShowExportDropdown((prev) => !prev)}
+      className="ml-2"
+      type="button"
+    >
+      Export
+    </Button>
+    {showExportDropdown && (
+      <ul className="absolute left-0 mt-2 w-32 bg-white border rounded shadow z-50">
+        <li
+          className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+          onClick={() => handleExport("csv")}
+        >
+          CSV
+        </li>
+        <li
+          className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+          onClick={() => handleExport("xlsx")}
+        >
+          XLSX
+        </li>
+        <li
+          className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+          onClick={() => handleExport("pdf")}
+        >
+          PDF
+        </li>
+      </ul>
+    )} */}
+    
+
+
         </div>
         <div className="flex gap-3">
+            <span className="font-medium">Export as</span>
+  <Select value={format} onValueChange={val => setFormat(val as "pdf" | "csv" | "xlsx")}>
+    <SelectTrigger className="w-[100px]">
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem className="custom-outline-select-item" value="pdf">PDF</SelectItem>
+      <SelectItem className="custom-outline-select-item" value="csv">CSV</SelectItem>
+      <SelectItem className="custom-outline-select-item" value="xlsx">XLSX</SelectItem>
+    </SelectContent>
+  </Select>
+  <Button
+    onClick={() => handleExport(format)}
+    className="custom-csv-button"
+    variant="outline"
+    type="button"
+  >
+    <Download size={16} /> Export
+  </Button>
           {userDetails?.userDetails?.UserRole === 'owner' && (
-            <Button onClick={() => navigate("/add-business-contact")} className="custom-appbar text-white">
+            <Button onClick={() => navigate("/add-vendor-form")} className="custom-appbar text-white">
               Add Vendor
             </Button>
           )}
@@ -322,7 +433,7 @@ const { id: VendorID } = useParams();
   
       {/* Loading & error */}
       {loading && <div className="text-center text-muted-foreground mt-8">Loading vendors...</div>}
-      {error && <div className="text-center text-red-600 mt-8">{error}</div>}
+
 
       {/* Vendors list */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -358,7 +358,7 @@ const accountId = userDetails?.userDetails?.AccountID || "";
           <button
           type="button"
           className="border border-gray-300 text-gray-700 px-5 py-2 rounded hover:bg-gray-100 transition custom-cancel-button"
-            onClick={() => navigate(`/vendors`)}
+            onClick={() => navigate(`/vendors/${accountId ? `?account_id=${accountId}` : ''}`)}
         >
           Cancel
         </button>

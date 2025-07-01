@@ -37,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   {/* Sticky Container for both navbars */}
   <div className="position-sticky top-0" style={{ zIndex: 1030 }}>
     {/* Top Navbar */}
- <nav className="navbar navbar-dark bg-primary px-3">
+ <nav className="navbar navbar-dark bg-light px-3">
   <div className="d-flex align-items-center">
    <img
   src="/AurumiLogo.png"
@@ -46,14 +46,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   height="28"
   className="me-2 rounded-circle"
 />
-    <span className="navbar-brand mb-0 h1">Vendors Management</span>
+    <span className="navbar-brand text-black mb-0 h1">Vendors Management</span>
   </div>
 </nav>
 
 
 
     {/* Horizontal Nav Links */}
-    <div className="bg-light border-bottom shadow-sm">
+    <div className="bg-white border-bottom shadow-sm">
       <div className="container-fluid overflow-auto py-2 d-flex gap-3">
         {navLinks.map((link) => (
           <NavLink

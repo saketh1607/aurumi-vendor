@@ -3,9 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
 import { useRef } from "react";
-
-
-
+import Papa from "papaparse";
 
 const AddVendor = () => {
   const [formData, setFormData] = useState({
@@ -25,10 +23,11 @@ const AddVendor = () => {
   const userDetails = useContext(UserDetailsContext);
   const [categories, setCategories] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-const [showSuggestions, setShowSuggestions] = useState(false);
-const [vendorTypeSearchTerm, setVendorTypeSearchTerm] = useState("");
-const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [vendorTypeSearchTerm, setVendorTypeSearchTerm] = useState("");
+  const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false);
   const serviceTypeRef = useRef<HTMLDivElement>(null);
+  const accountId = userDetails?.userDetails?.AccountID || "";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,13 +43,13 @@ const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-const filteredContacts = contacts.filter(contact =>
-  `${contact.FirstName} ${contact.LastName}`.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  const filteredContacts = contacts.filter(contact =>
+    `${contact.FirstName} ${contact.LastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-const filteredVendorTypes = categories.filter(category =>
-  category.CategoryName.toLowerCase().includes(vendorTypeSearchTerm.toLowerCase())
-);
+  const filteredVendorTypes = categories.filter(category =>
+    category.CategoryName.toLowerCase().includes(vendorTypeSearchTerm.toLowerCase())
+  );
   // Fetch business contacts and categories
   useEffect(() => {
     const fetchContacts = async () => {
@@ -172,7 +171,46 @@ const filteredVendorTypes = categories.filter(category =>
       setLoading(false);
     }
   };
-const accountID = userDetails?.userDetails?.AccountID || "";
+
+  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const rows = results.data as any[];
+        for (const row of rows) {
+          // Map CSV columns to API fields
+          const payload = {
+            Name: row["Vendor Name"] || "",
+            MobileNo: row["Contact Number"] || "",
+            EmailId: row["Email"] || "",
+            Address: row["Address"] || "",
+            Notes: row["Notes"] || "",
+            Status: row["Status"] || "",
+            VendorType: row["Service Type"] || "",
+            // Add other required fields if needed
+          };
+          try {
+            await axios.post(
+              `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/AddVendor`,
+              payload
+            );
+          } catch (error) {
+            console.error("Failed to import vendor:", payload, error);
+          }
+        }
+        alert("CSV import completed!");
+      },
+      error: (err) => {
+        alert("Failed to parse CSV: " + err.message);
+      }
+    });
+  };
+
+  const accountID = userDetails?.userDetails?.AccountID || "";
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-1">Add Vendor Details</h2>
@@ -338,7 +376,7 @@ const accountID = userDetails?.userDetails?.AccountID || "";
             </button>
             <button
               type="button"
-                onClick={() => navigate(`/vendors`)}
+                 onClick={() => navigate(`/vendors/${accountId ? `?account_id=${accountId}` : ''}`)}
               className="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-100 custom-cancel-button"
             >
               Cancel

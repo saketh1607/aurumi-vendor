@@ -174,7 +174,7 @@ const EditVendor = () => {
       : formData.VendorType
       ? [formData.VendorType, ...categories]
       : categories;
-const accounytID = userDetails?.userDetails?.AccountID || "";
+const accountID = userDetails?.userDetails?.AccountID || "";
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-1">Edit Vendor</h2>
@@ -276,7 +276,7 @@ const accounytID = userDetails?.userDetails?.AccountID || "";
           <button
             type="button"
             
-            onClick={() => navigate(buildPOUrl(`/vendors`))}
+            onClick={() => navigate(`/vendors/${accountID ? `?account_id=${accountID}` : ''}`)}
             className=" custom-cancel-button px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100"
           >
             Cancel
