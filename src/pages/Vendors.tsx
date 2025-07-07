@@ -412,7 +412,7 @@ const { id: VendorID } = useParams();
   >
     <Download size={16} /> Export
   </Button>
-          {userDetails?.userDetails?.UserRole === 'owner' && (
+          {hasFeature("Add_Vendor") && (
             <Button onClick={() => navigate("/add-vendor-form")} className="custom-appbar text-white">
               Add Vendor
             </Button>
