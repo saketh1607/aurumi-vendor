@@ -10,6 +10,7 @@ const AddVendor = () => {
     ContactID: "",
     Address: "",
     VendorType: "",
+    CategoryID: "", // <-- Add this line
     Status: "Active",
     Notes: "",
   });
@@ -142,10 +143,12 @@ const AddVendor = () => {
       const payload = {
         ContactID: formData.ContactID?.toString() || "",
         Address: formData.Address?.toString() || "",
-        VendorType: formData.VendorType?.toString() || "",
+        VendorType: formData.CategoryID?.toString() || "", // <-- Pass CategoryID here
         Status: formData.Status?.toString() || "",
         Notes: formData.Notes?.toString() || "",
       };
+
+      console.log("Submitting payload:", payload); // <-- Add this line
 
       await axios.post(
         `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/AddVendor`,
@@ -157,6 +160,7 @@ const AddVendor = () => {
         ContactID: "",
         Address: "",
         VendorType: "",
+        CategoryID: "", // <-- Add this line
         Status: "Active",
         Notes: "",
       });
@@ -211,6 +215,7 @@ const AddVendor = () => {
   };
 
   const accountID = userDetails?.userDetails?.AccountID || "";
+  console.log("abc",filteredVendorTypes);
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-1">Add Vendor Details</h2>
@@ -301,7 +306,11 @@ const AddVendor = () => {
               <li
                 key={category.CategoryID}
                 onClick={() => {
-                  setFormData({ ...formData, VendorType: category.CategoryName });
+                  setFormData({
+                    ...formData,
+                    VendorType: category.CategoryName,
+                    CategoryID: category.CategoryID, // <-- Save CategoryID
+                  });
                   setVendorTypeSearchTerm(category.CategoryName);
                   setShowVendorTypeSuggestions(false);
                 }}
@@ -363,7 +372,7 @@ const AddVendor = () => {
             className="px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-100"
            onClick={() => navigate("/add-business-contact")}
           >
-            ← Back
+             Back
           </button>
 
           <div className="flex gap-2">

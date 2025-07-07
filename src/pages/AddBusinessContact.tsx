@@ -282,7 +282,7 @@ const accountId = userDetails?.userDetails?.AccountID || "";
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Last Name *</label>
+          <label className="block text-sm font-medium mb-1">Last Name </label>
           <input
             type="text"
             name="LastName"

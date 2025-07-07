@@ -18,6 +18,7 @@ const Dashboard: React.FC = () => {
   const teamContactID = String(userDetails?.userDetails?.TeamContactID);
   const userRole = userDetails?.userDetails?.UserRole;
   const isOwner = userRole === 'owner';
+  console.log("userDetails 123 abc", userDetails?.userDetails?.BusinessID);
 
   const fetchSummaries = async () => {
     if (!businessID) {
@@ -28,38 +29,42 @@ const Dashboard: React.FC = () => {
     setLoading(true);
 
     try {
-  const baseUrl = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
-  const commonPayload = {
-    BusinessID: businessID,
-    ...(isOwner ? {} : { TeamContactID: teamContactID }),
-  };
+      const baseUrl = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
+      const commonPayload = {
+        BusinessID: businessID,
+        ...(isOwner ? {} : { TeamContactID: teamContactID }),
+      };
 
-const [vendorsRes, categoriesRes] = await Promise.all([
-  axios.post(`${baseUrl}/purchases/GetVendorsList`, commonPayload),
-  axios.post(`${baseUrl}/purchases/GetVendorCategories`, { BusinessID: businessID }),
-]);
+      const vendorsRes = await axios.post(`${baseUrl}/purchases/GetVendorsList`, commonPayload);
+      const vendors = Array.isArray(vendorsRes.data) ? vendorsRes.data : [];
 
-const totalVendors = Array.isArray(vendorsRes.data) ? vendorsRes.data.length : 0;
-const totalCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data.length : 0;
+      // Group by VendorType
+      const vendorTypeCounts: Record<string, number> = {};
+      vendors.forEach(vendor => {
+        const type = vendor.VendorType || "Unknown";
+        vendorTypeCounts[type] = (vendorTypeCounts[type] || 0) + 1;
+      });
 
-setDashboardSummary({
-  TotalVendors: totalVendors,
-  TotalCategories: totalCategories,
-});
+      setDashboardSummary({
+        TotalVendors: vendors.length,
+        VendorTypeCounts: vendorTypeCounts,
+      });
 
-
-  setError(null);
-} catch (err) {
-  console.error('Error fetching dashboard data:', err);
-  setError('Failed to load data');
-} finally {
-  setLoading(false);
-}
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Failed to load data');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
+  console.log("Effect ran, businessID:", userDetails?.userDetails?.BusinessID);
+  if (userDetails?.userDetails?.BusinessID) {
     fetchSummaries();
-  }, [businessID, teamContactID, isOwner]);
+  }
+}, [userDetails?.userDetails?.BusinessID]);
 
   const selfReqCount = isOwner
     ? Object.values(reqSummaryByUser?.[teamContactID] || {}).reduce((sum, val) => sum + val, 0)
@@ -78,19 +83,30 @@ setDashboardSummary({
       <h1 className="text-2xl font-bold">Dashboard</h1>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-        <StatCard
+      {/* <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4"> */}
+        {/* <StatCard
           title="Total vendors"
           value={dashboardSummary?.TotalVendors ?? 0}
           icon={<FileText />}
-         
-        />
-        <StatCard title="Total ServiceType" value={dashboardSummary?.TotalCategories ?? 0} icon={<Package />} />
-   
-      </div>
+        /> */}
+{/* 
+        {dashboardSummary?.VendorTypeCounts && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {Object.entries(dashboardSummary.VendorTypeCounts).map(([type, count]) => (
+              <StatCard
+                key={type}
+                title={`Type: ${type}`}
+                value={count}
+                icon={<Package />}
+              />
+            ))}
+          </div>
+        )} */}
+        
+      {/* </div> */}
 
       {/* Requisition and PO Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         {/* Requisition Summary */}
         {/* <Card>
           <CardHeader>
@@ -179,6 +195,32 @@ setDashboardSummary({
             )}
           </CardContent>
         </Card> */}
+
+        {/* Vendor Type Summary */}
+        <Card>
+  <CardHeader>
+    <CardTitle className="text-lg">Vendor Type Summary</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {error ? (
+      <p className="text-red-500 text-sm">{error}</p>
+    ) : !dashboardSummary?.VendorTypeCounts || Object.keys(dashboardSummary.VendorTypeCounts).length === 0 ? (
+      <p className="text-muted-foreground text-sm">No data found</p>
+    ) : (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {Object.entries(dashboardSummary.VendorTypeCounts).map(([type, count]) => (
+          <div key={type} className="flex text-sm">
+            <span className="w-32 capitalize">{type}</span>
+            <span className="ml-2 inline-block px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold whitespace-nowrap">
+  {count}
+</span>
+
+          </div>
+        ))}
+      </div>
+    )}
+  </CardContent>
+</Card>
       </div>
     </div>
   );

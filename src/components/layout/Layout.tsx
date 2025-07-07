@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
-import { Home, FileText, CheckSquare, Package, Database, Archive,Store } from 'lucide-react';
+import { Home, FileText,Settings, Briefcase, ShieldCheck,CheckSquare, Package, Database, Archive,Store } from 'lucide-react';
 
 
 interface LayoutProps {
@@ -18,7 +18,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const allNavLinks = [
     { to: '/', label: 'Dashboard', icon: <Home size={20} /> },
-    { to:  `/vendors`, label: 'Vendors', icon: <Store size={20} /> }
+    { to:  `/vendors`, label: 'Vendors', icon: <Store size={20} /> },
+    { to:  `/vendor-categories`, label: 'Service Types', icon: <Settings size={20} /> }
       // { to: '/vendors', label: 'Vendors', icon: <img src="/icon.png" alt="Vendors" className="w-5 h-5" /> }
       // { to: '/requisitions', label: 'Requisitions', icon: <FileText size={20} /> },
     // { to: '/approvals', label: 'Approvals', icon: <CheckSquare size={20} /> },
