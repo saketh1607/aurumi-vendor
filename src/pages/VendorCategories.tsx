@@ -172,14 +172,14 @@ const VendorCategories: React.FC = () => {
     <div className="space-y-4 px-2 sm:px-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center">
-          <div className="back-button">
+          {/* <div className="back-button">
             <ChevronLeft onClick={() => navigate(-1)} className="rounded-circle" />
-          </div>
-          <h1 className="text-2xl font-bold">Vendor ServiceType</h1>
+          </div> */}
+          <h1 className="text-2xl font-bold">Vendor Service Types</h1>
         </div>
        
            {userDetails?.UserRole === 'owner' && (
-          <Button onClick={() => setIsDialogOpen(true)} className='custom-appbar'>Add ServiceType</Button>
+          <Button onClick={() => setIsDialogOpen(true)} className='custom-appbar'>Add Service Type</Button>
         )}
       </div>
 
@@ -218,7 +218,7 @@ const VendorCategories: React.FC = () => {
           {/* Description */}
           <div className="text-sm text-gray-700 italic border-t pt-2">
             <span className="not-italic font-medium">Description:</span>{' '}
-            {category.Description || 'No description'}
+            {category.Description}
           </div>
 
           {/* Action Buttons */}

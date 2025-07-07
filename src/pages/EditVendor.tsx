@@ -10,16 +10,19 @@ const EditVendor = () => {
   const serviceTypeRef = useRef<HTMLDivElement>(null);
   const queryParams = new URLSearchParams(location.search);
   const accountId = queryParams.get('account_id');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [vendorTypeSearchTerm, setVendorTypeSearchTerm] = useState("");
+    const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false);
   const buildPOUrl = (path: string) =>
   accountId ? `${path}?account_id=${accountId}` : path;
 
   const [formData, setFormData] = useState({
-    VendorID: "",
+    ContactID: "",
     Address: "",
     VendorType: "",
+    CategoryID: "", // <-- Add this line
     Status: "Active",
     Notes: "",
-    ContactID: "",
   });
 
   const [contacts, setContacts] = useState<any[]>([]);
@@ -57,12 +60,11 @@ const EditVendor = () => {
 
     if (vendor) {
       setFormData({
-        VendorID: vendor.VendorID || "",
+        ContactID: vendor.VendorContactID || "",
         Address: vendor.Address || "",
         VendorType: vendor.VendorType || "",
         Status: vendor.Status || "Active",
         Notes: vendor.Notes || "",
-        ContactID: vendor.VendorContactID || "",
       });
     }
 
@@ -88,6 +90,7 @@ const EditVendor = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -175,6 +178,9 @@ const EditVendor = () => {
       ? [formData.VendorType, ...categories]
       : categories;
 const accountID = userDetails?.userDetails?.AccountID || "";
+ const filteredVendorTypes = categories.filter(category =>
+    category.CategoryName.toLowerCase().includes(vendorTypeSearchTerm.toLowerCase())
+  );
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-1">Edit Vendor</h2>
@@ -210,25 +216,47 @@ const accountID = userDetails?.userDetails?.AccountID || "";
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Service Type *
-            </label>
-            <select
-              name="VendorType"
-              value={formData.VendorType}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded text-sm"
-            >
-              <option value="">Select Service Type</option>
-              {categories.map((cat: any) => (
-                <option key={cat.CategoryID} value={cat.CategoryName}>
-                  {cat.CategoryName}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="relative" ref={serviceTypeRef}>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Service Type *</label>
+      <input
+        type="text"
+        value={vendorTypeSearchTerm}
+        onChange={(e) => {
+          setVendorTypeSearchTerm(e.target.value);
+          setShowVendorTypeSuggestions(true);
+        }}
+        onFocus={() => setShowVendorTypeSuggestions(true)}
+        placeholder="Type to search vendor type"
+        className="w-full border px-3 py-2 rounded text-sm"
+        required
+      />
+
+      {showVendorTypeSuggestions && (
+        <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
+          {filteredVendorTypes.length > 0 ? (
+            filteredVendorTypes.map((category) => (
+              <li
+                key={category.CategoryID}
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    VendorType: category.CategoryName,
+                    CategoryID: category.CategoryID, // <-- Save CategoryID
+                  });
+                  setVendorTypeSearchTerm(category.CategoryName);
+                  setShowVendorTypeSuggestions(false);
+                }}
+                className="px-3 py-2 cursor-pointer hover:bg-blue-100 text-sm"
+              >
+                {category.CategoryName}
+              </li>
+            ))
+          ) : (
+            <li className="px-3 py-2 text-sm text-gray-500">No vendor types found</li>
+          )}
+        </ul>
+      )}
+    </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

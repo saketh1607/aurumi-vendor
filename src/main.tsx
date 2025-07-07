@@ -8,7 +8,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 // Import the CSS globally
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+
     <App />
-  </React.StrictMode>
+ 
 );

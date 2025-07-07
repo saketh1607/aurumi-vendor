@@ -106,6 +106,8 @@ export const UserDetailsProvider: React.FC<UserDetailsProviderProps> = ({ childr
     fetchUserDetails();
   }, [account_id, version]);
 
+ 
+
   const value: UserDetailsContextType = {
     userDetails,
     isLoading,

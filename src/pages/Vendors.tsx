@@ -81,7 +81,6 @@ const { id: VendorID } = useParams();
 
 
   const API_BASE = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
- 
 
   // Fetch vendors
   const fetchVendors = async () => {
@@ -115,31 +114,31 @@ const { id: VendorID } = useParams();
   };
 
 
-    const fetchVendorCategories = async () => {
-      setLoading(true);
-      try {
-        const payload = {
-          BusinessID: userDetails?.userDetails?.BusinessID?.toString() || '',
-        };
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorCategories`,
-          payload
-        );
-        setCategories(response.data || []);
-        console.log("Fetched vendor categories:", response.data);
-      } catch (error) {
-        console.error('Error fetching vendor categories:', error);
-        alert('Failed to fetch vendor categories.');
-      } finally {
-        setLoading(false);
-      }
-    };
-      useEffect(() => {
-        if (userDetails) {
-          fetchVendorCategories();
-        }
-        // eslint-disable-next-line
-      }, [userDetails]);
+    // const fetchVendorCategories = async () => {
+    //   setLoading(true);
+    //   try {
+    //     const payload = {
+    //       BusinessID: userDetails?.userDetails?.BusinessID?.toString() || '',
+    //     };
+    //     const response = await axios.post(
+    //       `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/GetVendorCategories`,
+    //       payload
+    //     );
+    //     setCategories(response.data || []);
+    //     console.log("Fetched vendor categories:", response.data);
+    //   } catch (error) {
+    //     console.error('Error fetching vendor categories:', error);
+    //     alert('Failed to fetch vendor categories.');
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    //   useEffect(() => {
+    //     if (userDetails) {
+    //       fetchVendorCategories();
+    //     }
+    //     // eslint-disable-next-line
+    //   }, [userDetails]);
 
       const filteredVendors = vendors.filter(vendor =>
   vendor.Name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -394,7 +393,7 @@ const { id: VendorID } = useParams();
 
         </div>
         <div className="flex gap-3">
-            <span className="font-medium">Export as</span>
+            <span className="font-medium mt-2">Export as</span>
   <Select value={format} onValueChange={val => setFormat(val as "pdf" | "csv" | "xlsx")}>
     <SelectTrigger className="w-[100px]">
       <SelectValue />
@@ -413,12 +412,12 @@ const { id: VendorID } = useParams();
   >
     <Download size={16} /> Export
   </Button>
-          { hasFeature('Add_Vendor') && (
+          {userDetails?.userDetails?.UserRole === 'owner' && (
             <Button onClick={() => navigate("/add-vendor-form")} className="custom-appbar text-white">
               Add Vendor
             </Button>
           )}
-          <Button onClick={() => navigate("/vendor-categories")} className="custom-appbar">Manage ServiceType</Button>
+          {/* <Button onClick={() => navigate("/vendor-categories")} className="custom-appbar">Manage ServiceType</Button> */}
         </div>
       </div>
 
@@ -493,7 +492,7 @@ const { id: VendorID } = useParams();
 </div>
 
 <div className="flex items-center gap-2 min-w-0 break-words">
-        <MapPin className="w-4 h-4 text-gray-600" />
+        <MapPin className="w-4 h-4 text-gray-600 shrink-0" />
         <span>{vendor.Address}</span>
     </div>
     <div className="flex items-center gap-2 break-words">
@@ -504,8 +503,6 @@ const { id: VendorID } = useParams();
 
   </div>
 
-
-         
                 <div className="flex space-x-2 mt-2">
       <div>
         <button
