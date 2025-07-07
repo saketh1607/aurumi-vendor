@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
 import { useAppContext } from "@/contexts/AppContext";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
+import useFeatureFlags from "@/hooks/useFeatureFlags";
 import { Edit, Delete } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import axios from "axios";
@@ -65,6 +66,7 @@ const Vendors: React.FC = () => {
   const navigate = useNavigate();
   const { users } = useAppContext();
   const userDetails = useContext(UserDetailsContext);
+  const { hasFeature, isLoading: featureFlagsLoading } = useFeatureFlags();
   const [searchQuery, setSearchQuery] = useState("");
   const queryParams = new URLSearchParams(location.search);
   const accountId = queryParams.get('account_id');
@@ -411,7 +413,7 @@ const { id: VendorID } = useParams();
   >
     <Download size={16} /> Export
   </Button>
-          {userDetails?.userDetails?.UserRole === 'owner' && (
+          { hasFeature('Add_Vendor') && (
             <Button onClick={() => navigate("/add-vendor-form")} className="custom-appbar text-white">
               Add Vendor
             </Button>
