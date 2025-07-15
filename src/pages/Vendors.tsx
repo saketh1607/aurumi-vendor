@@ -16,7 +16,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useRef } from "react";
-import { Download } from "lucide-react";
+import { Download, Upload, Plus } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -52,6 +52,11 @@ interface VendorCategory {
   Description: string;
   IsActive: boolean;
 }
+interface ImportXLSXButtonProps {
+  onFileImport: (data: any[]) => void;
+  className?: string;
+}
+
 const Vendors: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -81,13 +86,45 @@ const { id: VendorID } = useParams();
 
 
   const API_BASE = `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}`;
+  // const API_BASE ="https://api.shoptalk.in:8443";
 
   // Fetch vendors
+  // const fetchVendors = async () => {
+  //    const BusinessId=userDetails?.userDetails.BusinessID;
+  //   if (!userDetails) return;
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const res = await fetch(`${API_BASE}/purchases/GetVendorsList`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         accept: "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         BusinessID: String(BusinessId),
+  //       }),
+  //     });
+
+  //     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+  //     const json = await res.json();
+  //     const data: Vendor[] = Array.isArray(json) ? json : json.vendors || json.data || [];
+  //     setVendors(data);
+  //     console.log("Fetched vendors 123:", data);
+  //   } catch (err: any) {
+  //     setError( "Failed to fetch vendors");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchVendors = async () => {
-     const BusinessId=userDetails?.userDetails.BusinessID;
-    if (!userDetails) return;
+    const businessID = userDetails?.userDetails?.BusinessID;
+    console.log("Business ID:", businessID);
+    if (!businessID) return;
     setLoading(true);
     setError(null);
+  
     try {
       const res = await fetch(`${API_BASE}/purchases/GetVendorsList`, {
         method: "POST",
@@ -96,23 +133,22 @@ const { id: VendorID } = useParams();
           accept: "application/json",
         },
         body: JSON.stringify({
-          BusinessID: String(BusinessId),
+          BusinessID: String(businessID),
         }),
       });
-
+  
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
+  
       const json = await res.json();
       const data: Vendor[] = Array.isArray(json) ? json : json.vendors || json.data || [];
       setVendors(data);
-      console.log("Fetched vendors 123:", data);
     } catch (err: any) {
-      setError( "Failed to fetch vendors");
+      setError(err.message || "Failed to fetch vendors");
     } finally {
       setLoading(false);
     }
   };
-
+  
 
     // const fetchVendorCategories = async () => {
     //   setLoading(true);
@@ -139,6 +175,7 @@ const { id: VendorID } = useParams();
     //     }
     //     // eslint-disable-next-line
     //   }, [userDetails]);
+    
 
       const filteredVendors = vendors.filter(vendor =>
   vendor.Name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -359,66 +396,70 @@ const { id: VendorID } = useParams();
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Manage Vendors</h1>
          
-    {/* <Button
-      onClick={() => setShowExportDropdown((prev) => !prev)}
-      className="ml-2"
-      type="button"
+   
+
+
+        </div>
+        <div className="flex flex-col xs:flex-row gap-3 items-start xs:items-center justify-between">
+  {/* Export controls - now in its own clearly grouped section */}
+  <div className="flex items-center gap-2 bg-gray-50/50 dark:bg-gray-800/30 px-3 py-2 rounded-lg">
+    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
+      Export as
+    </span>
+    <Select value={format} onValueChange={(val) => setFormat(val as "pdf" | "csv" | "xlsx")}>
+      <SelectTrigger className="w-[100px] h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="pdf" className="text-sm">PDF</SelectItem>
+        <SelectItem value="csv" className="text-sm">CSV</SelectItem>
+        <SelectItem value="xlsx" className="text-sm">XLSX</SelectItem>
+      </SelectContent>
+    </Select>
+    <Button
+      onClick={() => handleExport(format)}
+      variant="outline"
+      size="sm"
+      className="h-9 border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
     >
-      Export
+      <Download className="w-4 h-4 mr-2" />
+      <span className="sr-only xs:not-sr-only">Export</span>
     </Button>
-    {showExportDropdown && (
-      <ul className="absolute left-0 mt-2 w-32 bg-white border rounded shadow z-50">
-        <li
-          className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-          onClick={() => handleExport("csv")}
-        >
-          CSV
-        </li>
-        <li
-          className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-          onClick={() => handleExport("xlsx")}
-        >
-          XLSX
-        </li>
-        <li
-          className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-          onClick={() => handleExport("pdf")}
-        >
-          PDF
-        </li>
-      </ul>
-    )} */}
-    
+  </div>
 
+  {/* Action buttons - better visual hierarchy */}
+  <div className="flex flex-wrap gap-2">
+    <Button
+      onClick={() => navigate("/import-vendor")}
+      variant="outline"
+      size="sm"
+      className="border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+    >
+      <Upload className="w-4 h-4 mr-2" />
+      <span>Import</span>
+    </Button>
 
-        </div>
-        <div className="flex gap-3">
-            <span className="font-medium mt-2">Export as</span>
-  <Select value={format} onValueChange={val => setFormat(val as "pdf" | "csv" | "xlsx")}>
-    <SelectTrigger className="w-[100px]">
-      <SelectValue />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem className="custom-outline-select-item" value="pdf">PDF</SelectItem>
-      <SelectItem className="custom-outline-select-item" value="csv">CSV</SelectItem>
-      <SelectItem className="custom-outline-select-item" value="xlsx">XLSX</SelectItem>
-    </SelectContent>
-  </Select>
-  <Button
-    onClick={() => handleExport(format)}
-    className="custom-csv-button"
-    variant="outline"
-    type="button"
-  >
-    <Download size={16} /> Export
-  </Button>
-          {hasFeature("Add_Vendor") && (
-            <Button onClick={() => navigate("/add-vendor-form")} className="custom-appbar text-white">
-              Add Vendor
-            </Button>
-          )}
-          {/* <Button onClick={() => navigate("/vendor-categories")} className="custom-appbar">Manage ServiceType</Button> */}
-        </div>
+    {hasFeature("Add_Vendor") && (
+      <Button
+        onClick={() => navigate("/add-vendor-form")}
+        size="sm"
+        className="bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        <span>New Vendor</span>
+      </Button>
+    )}
+
+    <Button
+      onClick={() => navigate("/add-vendor")}
+      size="sm"
+      className="bg-blue-600 hover:bg-blue-700 text-white"
+    >
+      <Plus className="w-4 h-4 mr-2" />
+      <span>Add Vendor</span>
+    </Button>
+  </div>
+</div>
       </div>
 
       {/* Search Bar */}
@@ -516,7 +557,7 @@ const { id: VendorID } = useParams();
         </button>
       </div>
       <div className="flex justify-end flex-1">
-        {/* <button
+        <button
          onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteVendor(vendor.VendorID);
@@ -525,7 +566,7 @@ const { id: VendorID } = useParams();
         
         >
           Delete
-        </button> */}
+        </button>
       </div>
     </div>
               </CardContent>
