@@ -19,6 +19,7 @@ import AddVendor from "./pages/AddVendor";
 import EditVendor from "./pages/EditVendor";
 import ExportDropdown from "./pages/ExportDropdown";
 import ImportVendorsPage from "./pages/ImportVendorsPage";
+import { AlertDialogProvider } from "./contexts/AlertDialogContext";
 const queryClient = new QueryClient();
 
 
@@ -29,27 +30,29 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-        <UserDetailsProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-            
-              <Route path="*" element={<NotFound />} />
-            
-                <Route path="/vendors" element={<Vendors/>} />
-              <Route path="/add-vendor" element={<AddVendorPage />} />
-              <Route path="/import-vendor" element={<ImportVendorsPage />} />
-              <Route path="/vendor-categories" element={<VendorCategories />} />
-              <Route path="/add-business-contact" element={<AddBusinessContact />} />
-              <Route path="/add-vendor-form" element={<AddVendor />} />
-              <Route path="/vendors/edit/:id" element={<EditVendor />} />
-              <Route path="/export-dropdown" element={<ExportDropdown onExport={(format) => console.log(`Exporting as ${format}`)} />} />
-            
-            </Routes>
-          </Layout>
-          </UserDetailsProvider>
-        </BrowserRouter>
+        <AlertDialogProvider>
+          <BrowserRouter>
+          <UserDetailsProvider>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+              
+                <Route path="*" element={<NotFound />} />
+              
+                  <Route path="/vendors" element={<Vendors/>} />
+                <Route path="/add-vendor" element={<AddVendorPage />} />
+                <Route path="/import-vendor" element={<ImportVendorsPage />} />
+                <Route path="/vendor-categories" element={<VendorCategories />} />
+                <Route path="/add-business-contact" element={<AddBusinessContact />} />
+                <Route path="/add-vendor-form" element={<AddVendor />} />
+                <Route path="/vendors/edit/:id" element={<EditVendor />} />
+                <Route path="/export-dropdown" element={<ExportDropdown onExport={(format) => console.log(`Exporting as ${format}`)} />} />
+              
+              </Routes>
+            </Layout>
+            </UserDetailsProvider>
+          </BrowserRouter>
+        </AlertDialogProvider>
       </TooltipProvider>
     </AppProvider>
   </QueryClientProvider>

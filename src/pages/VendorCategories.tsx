@@ -21,6 +21,7 @@ import { ChevronLeft } from "lucide-react";
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { Edit, Delete } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
 interface VendorCategory {
   CategoryID: number;
@@ -44,6 +45,7 @@ const VendorCategories: React.FC = () => {
   const [missingFields, setMissingFields] = useState<string[]>([]);
 
   const navigate = useNavigate();
+  const { showAlertDialog } = useAlertDialog();
 
   const fetchVendorCategories = async () => {
     setLoading(true);
@@ -58,7 +60,7 @@ const VendorCategories: React.FC = () => {
       setCategories(response.data || []);
     } catch (error) {
       console.error('Error fetching vendor categories:', error);
-      alert('Failed to fetch vendor categories.');
+      showAlertDialog('Failed to fetch vendor categories.');
     } finally {
       setLoading(false);
     }
@@ -106,21 +108,21 @@ const VendorCategories: React.FC = () => {
             CategoryID: selectedCategoryID.toString(),
           }
         );
-        alert('Category updated successfully');
+        showAlertDialog('Category updated successfully');
       } else {
         // Add
         await axios.post(
           `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_PORTNO}/purchases/AddVendorCategory`,
           payload
         );
-        alert('Category added successfully');
+        showAlertDialog('Category added successfully');
       }
 
       handleDialogClose();
       fetchVendorCategories();
     } catch (error) {
       console.error('Error saving category:', error);
-      alert('Failed to save vendor category.');
+      showAlertDialog('Failed to save vendor category.');
     }
   };
 
@@ -147,13 +149,13 @@ const VendorCategories: React.FC = () => {
 
       if (res.data?.RetString === '1') {
         setCategories(prev => prev.filter(cat => cat.CategoryID !== categoryID));
-        alert('Category deleted successfully.');
+        showAlertDialog('Category deleted successfully.');
       } else {
-        alert("Category is already in use. You can't delete it.");
+        showAlertDialog("Category is already in use. You can't delete it.");
       }
     } catch (error: any) {
       console.error('Error deleting category:', error?.response?.data || error.message);
-      alert('Failed to delete category due to a server error.');
+      showAlertDialog('Failed to delete category due to a server error.');
     } finally {
       setDeletingCategoryId(null);
     }

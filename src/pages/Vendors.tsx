@@ -27,6 +27,7 @@ import {
 import ExportDropdown from './ExportDropdown';
 
 import { CSVLink } from "react-csv";
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 interface Vendor {
   VendorID: number;
   Name: string;
@@ -215,6 +216,8 @@ const { id: VendorID } = useParams();
     }
   }, [userDetails]);
 
+  const { showAlertDialog } = useAlertDialog();
+
   const handleDeleteVendor = async (vendorID: number) => {
     if (!window.confirm("Are you sure you want to delete this vendor?")) return;
 
@@ -227,14 +230,14 @@ const { id: VendorID } = useParams();
       );
 
       if (res.data?.RetString === '1') {
-        alert("Vendor deleted successfully.");
+        showAlertDialog("Vendor deleted successfully.");
         fetchVendors();
       } else {
-        alert("Vendor is already in use. You can't delete it.");
+        showAlertDialog("Vendor is already in use. You can't delete it.");
       }
     } catch (error: any) {
       console.error("Error deleting vendor:", error?.response?.data || error.message);
-      alert("Failed to delete vendor due to a server error.");
+      showAlertDialog("Failed to delete vendor due to a server error.");
     } finally {
       setDeletingVendorId(null);
     }
@@ -292,7 +295,7 @@ const { id: VendorID } = useParams();
   setMissingFields(missing);
 
   if (missing.length > 0) {
-    alert("Please fill all required fields: " + missing.join(", "));
+    showAlertDialog("Please fill all required fields: " + missing.join(", "));
     return;
   }
 
@@ -334,11 +337,11 @@ const { id: VendorID } = useParams();
       throw new Error((data && data.message) || `Failed to update vendor: ${res.statusText}`);
     }
 
-    alert("Vendor updated successfully.");
+    showAlertDialog("Vendor updated successfully.");
     closeEditDialog();
     fetchVendors();
   } catch (err: any) {
-    alert("Error updating vendor: " + (err.message || "Unknown error"));
+    showAlertDialog("Error updating vendor: " + (err.message || "Unknown error"));
   } finally {
     setUpdateLoading(false);
   }
@@ -371,7 +374,7 @@ const { id: VendorID } = useParams();
       XLSX.writeFile(wb, `vendors.${type === "csv" ? "csv" : "xlsx"}`);
     } else if (type === "pdf") {
       if (!exportData.length) {
-        alert("No data to export.");
+        showAlertDialog("No data to export.");
         return;
       }
        const doc = new jsPDF();
