@@ -531,26 +531,31 @@ const { id: VendorID } = useParams();
                   </div>
                 </div>
               </CardContent>
-              <div className="flex space-x-2 mt-2 px-4 pb-4">
-                <button
-                  className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteVendor(vendor.VendorID);
-                  }}
-                  className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px] text-center"
-                >
-                  Delete
-                </button>
-              </div>
+             <div className="flex space-x-4 mt-2">
+  <div>
+    <button
+      className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
+      }}
+    >
+      Edit
+    </button>
+  </div>
+  <div>
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteVendor(vendor.VendorID);
+      }}
+      className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px]"
+    >
+      Delete
+    </button>
+  </div>
+</div>
+
             </Card>
           ))}
       </div>
