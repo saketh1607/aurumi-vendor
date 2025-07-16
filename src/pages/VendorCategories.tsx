@@ -220,16 +220,16 @@ const VendorCategories: React.FC = () => {
 
       {/* Add/Edit Category Dialog - Improved Styling */}
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-md w-full mx-4 bg-white border border-gray-200 shadow-2xl rounded-2xl p-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+        <DialogContent className="sm:max-w-md w-full max-w-[95vw] sm:w-auto mx-2 sm:mx-4 bg-white border border-gray-200 shadow-2xl rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 sm:px-6 py-4">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-white">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-white">
                 {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
               </DialogTitle>
             </DialogHeader>
           </div>
           
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <form onSubmit={handleAddOrUpdateCategory} className="space-y-5" noValidate>
               <div className="space-y-2">
                 <label htmlFor="CategoryName" className="block text-sm font-semibold text-gray-700">
