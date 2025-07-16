@@ -531,29 +531,25 @@ const { id: VendorID } = useParams();
                   </div>
                 </div>
               </CardContent>
-             <div className="flex space-x-4 mt-2">
-  <div>
-    <button
-      className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md"
-      onClick={(e) => {
-        e.stopPropagation();
-        navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
-      }}
-    >
-      Edit
-    </button>
-  </div>
-  <div>
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleDeleteVendor(vendor.VendorID);
-      }}
-      className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px]"
-    >
-      Delete
-    </button>
-  </div>
+             <div className="flex justify-end gap-3 mt-4 px-4 pb-4">
+  <button
+    className="border border-gray-300 text-gray-700 font-medium px-4 py-1.5 rounded-md hover:bg-gray-50 transition-colors"
+    onClick={(e) => {
+      e.stopPropagation();
+      navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
+    }}
+  >
+    Edit
+  </button>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleDeleteVendor(vendor.VendorID);
+    }}
+    className="border border-red-300 text-red-600 font-medium px-4 py-1.5 rounded-md hover:bg-red-50 transition-colors min-w-[70px]"
+  >
+    Delete
+  </button>
 </div>
 
             </Card>
