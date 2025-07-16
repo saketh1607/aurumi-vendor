@@ -390,8 +390,8 @@ const Dashboard: React.FC = () => {
 
       {/* Tab Content */}
       {!error && activeTab === 'vendors' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-x-auto max-w-full">
+          <Card className="min-w-[320px]">
             <CardHeader>
               <CardTitle className="text-lg flex items-center space-x-2">
                 <PieChart className="h-5 w-5" />
@@ -399,7 +399,11 @@ const Dashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {hasData ? renderVendorPieChart() : (
+              {hasData ? (
+                <div className="w-full max-w-full overflow-x-auto">
+                  {renderVendorPieChart()}
+                </div>
+              ) : (
                 <div className="text-center py-8">
                   <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-muted-foreground">No vendor data available</p>
@@ -407,7 +411,7 @@ const Dashboard: React.FC = () => {
               )}
             </CardContent>
           </Card>
-          <Card>
+          <Card className="min-w-[320px]">
             <CardHeader>
               <CardTitle className="text-lg flex items-center space-x-2">
                 <BarChart2 className="h-5 w-5" />
@@ -415,7 +419,11 @@ const Dashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {hasData ? renderVendorBarChart() : (
+              {hasData ? (
+                <div className="w-full max-w-full overflow-x-auto">
+                  {renderVendorBarChart()}
+                </div>
+              ) : (
                 <div className="text-center py-8">
                   <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-muted-foreground">No vendor data available</p>
