@@ -14,11 +14,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogOverlay
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft, Edit, Trash2, Plus, Building2 } from "lucide-react";
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
@@ -164,192 +165,153 @@ const VendorCategories: React.FC = () => {
     if (userDetails?.BusinessID) {
       fetchVendorCategories();
     }
-    // eslint-disable-next-line
   }, [userDetails]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Vendor Categories</h1>
-                <p className="text-sm text-gray-600 mt-1">Manage your vendor categories efficiently</p>
-              </div>
-            </div>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Category
-            </Button>
-          </div>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex items-center mb-8">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="mr-4"
+          onClick={() => navigate(-1)}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
+        <h1 className="text-3xl font-bold text-gray-900">Vendor Categories</h1>
+        <Button 
+          onClick={() => setIsDialogOpen(true)} 
+          className="ml-auto"
+        >
+          Add Category
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
+      ) : categories.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+          <p className="text-gray-500 text-lg">No vendor categories found</p>
+          <Button 
+            onClick={() => setIsDialogOpen(true)} 
+            className="mt-4"
+          >
+            Create Your First Category
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...categories]
+            .sort((a, b) => b.CategoryID - a.CategoryID)
+            .map((category) => (
+              <Card key={category.CategoryID} className="hover:shadow-md transition-shadow duration-200">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg font-semibold line-clamp-1">
+                      {category.CategoryName}
+                    </CardTitle>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      ID: {category.CategoryID}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-4">
+                  <p className="text-gray-600 text-sm line-clamp-3">
+                    {category.Description || 'No description provided'}
+                  </p>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2 pt-0">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEditCategory(category)}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => handleDeleteCategory(category.CategoryID)}
+                    disabled={deletingCategoryId === category.CategoryID}
+                  >
+                    {deletingCategoryId === category.CategoryID ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Delete'
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+        </div>
+      )}
 
-        {/* Content Section */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-4">Loading categories...</p>
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="text-center py-20">
-            <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No vendor categories found</h3>
-            <p className="text-gray-600 mb-6">Get started by creating your first vendor category</p>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Category
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...categories]
-              .sort((a, b) => b.CategoryID - a.CategoryID)
-              .map((category) => (
-                <Card key={category.CategoryID} className="bg-white shadow-md hover:shadow-lg transition-all duration-200 border-0 rounded-xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">
-                          ID: {category.CategoryID}
-                        </p>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                          {category.CategoryName}
-                        </h3>
-                        <p className="text-sm text-gray-600 line-clamp-3 min-h-[3rem]">
-                          {category.Description || 'No description provided'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 pt-4 border-t border-gray-100">
-                      <button
-                        onClick={() => handleEditCategory(category)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCategory(category.CategoryID)}
-                        disabled={deletingCategoryId === category.CategoryID}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {deletingCategoryId === category.CategoryID ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
-                        )}
-                        Delete
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        )}
-
-        {/* Modern Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-          <DialogContent className="sm:max-w-md w-full max-w-[95vw] mx-auto bg-white rounded-2xl shadow-2xl border-0 p-0 overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-                  {isEditMode ? (
-                    <>
-                      <Edit className="w-5 h-5" />
-                      Edit Category
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5" />
-                      Add New Category
-                    </>
-                  )}
-                </DialogTitle>
-              </DialogHeader>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
+            </DialogTitle>
+            <DialogDescription>
+              {isEditMode 
+                ? 'Update the details of this vendor category' 
+                : 'Add a new vendor category to organize your vendors'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleAddOrUpdateCategory} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="CategoryName" className="block text-sm font-medium text-gray-700">
+                Category Name <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="CategoryName"
+                name="CategoryName"
+                value={formCategory.CategoryName}
+                onChange={handleChange}
+                placeholder="e.g. Office Supplies, IT Services"
+                className={`w-full ${missingFields.includes('CategoryName') ? 'border-red-500' : ''}`}
+                autoComplete="off"
+              />
+              {missingFields.includes('CategoryName') && (
+                <p className="text-sm text-red-600">
+                  Category name is required
+                </p>
+              )}
             </div>
             
-            {/* Form */}
-            <div className="p-6">
-              <form onSubmit={handleAddOrUpdateCategory} className="space-y-6" noValidate>
-                <div className="space-y-2">
-                  <label htmlFor="CategoryName" className="block text-sm font-semibold text-gray-700">
-                    Category Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    id="CategoryName"
-                    name="CategoryName"
-                    value={formCategory.CategoryName}
-                    onChange={handleChange}
-                    placeholder="Enter category name"
-                    className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      missingFields.includes('CategoryName') 
-                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                    autoComplete="off"
-                  />
-                  {missingFields.includes('CategoryName') && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <span className="text-red-500">⚠</span>
-                      Category name is required
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <label htmlFor="Description" className="block text-sm font-semibold text-gray-700">
-                    Description
-                  </label>
-                  <Textarea
-                    id="Description"
-                    name="Description"
-                    value={formCategory.Description}
-                    onChange={handleChange}
-                    placeholder="Enter description (optional)"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 resize-none"
-                    rows={4}
-                    autoComplete="off"
-                  />
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={handleDialogClose}
-                    className="flex-1 sm:flex-none sm:min-w-[120px] px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit"
-                    className="flex-1 sm:flex-none sm:min-w-[120px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    {isEditMode ? 'Update Category' : 'Add Category'}
-                  </Button>
-                </div>
-              </form>
+            <div className="space-y-2">
+              <label htmlFor="Description" className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <Textarea
+                id="Description"
+                name="Description"
+                value={formCategory.Description}
+                onChange={handleChange}
+                placeholder="Optional description for this category"
+                className="w-full min-h-[100px]"
+                autoComplete="off"
+              />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleDialogClose}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                {isEditMode ? 'Save Changes' : 'Add Category'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
