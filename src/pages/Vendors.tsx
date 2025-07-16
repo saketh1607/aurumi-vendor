@@ -27,6 +27,7 @@ import {
 import ExportDropdown from './ExportDropdown';
 
 import { CSVLink } from "react-csv";
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 interface Vendor {
   VendorID: number;
   Name: string;
@@ -164,7 +165,7 @@ const { id: VendorID } = useParams();
     //     console.log("Fetched vendor categories:", response.data);
     //   } catch (error) {
     //     console.error('Error fetching vendor categories:', error);
-    //     alert('Failed to fetch vendor categories.');
+    //     await showAlert('Failed to fetch vendor categories.');
     //   } finally {
     //     setLoading(false);
     //   }
@@ -227,14 +228,14 @@ const { id: VendorID } = useParams();
       );
 
       if (res.data?.RetString === '1') {
-        alert("Vendor deleted successfully.");
+        await showAlert("Vendor deleted successfully.");
         fetchVendors();
       } else {
-        alert("Vendor is already in use. You can't delete it.");
+        await showAlert("Vendor is already in use. You can't delete it.");
       }
     } catch (error: any) {
       console.error("Error deleting vendor:", error?.response?.data || error.message);
-      alert("Failed to delete vendor due to a server error.");
+      await showAlert("Failed to delete vendor due to a server error.");
     } finally {
       setDeletingVendorId(null);
     }
@@ -292,7 +293,7 @@ const { id: VendorID } = useParams();
   setMissingFields(missing);
 
   if (missing.length > 0) {
-    alert("Please fill all required fields: " + missing.join(", "));
+    await showAlert("Please fill all required fields: " + missing.join(", "));
     return;
   }
 
@@ -334,11 +335,11 @@ const { id: VendorID } = useParams();
       throw new Error((data && data.message) || `Failed to update vendor: ${res.statusText}`);
     }
 
-    alert("Vendor updated successfully.");
+    await showAlert("Vendor updated successfully.");
     closeEditDialog();
     fetchVendors();
   } catch (err: any) {
-    alert("Error updating vendor: " + (err.message || "Unknown error"));
+    await showAlert("Error updating vendor: " + (err.message || "Unknown error"));
   } finally {
     setUpdateLoading(false);
   }
@@ -371,7 +372,7 @@ const { id: VendorID } = useParams();
       XLSX.writeFile(wb, `vendors.${type === "csv" ? "csv" : "xlsx"}`);
     } else if (type === "pdf") {
       if (!exportData.length) {
-        alert("No data to export.");
+        await showAlert("No data to export.");
         return;
       }
        const doc = new jsPDF();
@@ -388,6 +389,8 @@ const { id: VendorID } = useParams();
     setShowExportDropdown(false);
   };
   
+
+  const { showAlert } = useAlertDialog();
 
   return (
     <div className="space-y-4 px-2 sm:px-4">

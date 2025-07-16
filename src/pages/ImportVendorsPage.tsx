@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { ChevronLeft, Download, Upload, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
 interface VendorImportData {
   'Vendor Name': string;
@@ -36,6 +37,7 @@ const ImportVendorsPage = () => {
   const navigate = useNavigate();
   const { userDetails, account_id } = useContext(UserDetailsContext);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showAlert } = useAlertDialog();
   
   const [importData, setImportData] = useState<VendorImportData[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
@@ -161,7 +163,7 @@ const ImportVendorsPage = () => {
     ];
     
     if (!validTypes.includes(file.type)) {
-      alert('Please select a valid Excel file (.xlsx or .xls)');
+      await showAlert('Please select a valid Excel file (.xlsx or .xls)');
       setImportStatus('idle');
       return;
     }
@@ -186,7 +188,7 @@ const ImportVendorsPage = () => {
         ];
         
         if (jsonData.length === 0) {
-          alert('The Excel file is empty. Please add vendor data and try again.');
+          await showAlert('The Excel file is empty. Please add vendor data and try again.');
           setImportStatus('idle');
           return;
         }
@@ -195,7 +197,7 @@ const ImportVendorsPage = () => {
         const missingColumns = requiredColumns.filter(col => !(col in firstRow));
         
         if (missingColumns.length > 0) {
-          alert(`Missing required columns: ${missingColumns.join(', ')}\n\nPlease download the sample template to see the correct format.`);
+          await showAlert(`Missing required columns: ${missingColumns.join(', ')}\n\nPlease download the sample template to see the correct format.`);
           setImportStatus('idle');
           return;
         }
@@ -219,7 +221,7 @@ const ImportVendorsPage = () => {
         
       } catch (error) {
         console.error('Error reading Excel file:', error);
-        alert('Error reading the Excel file. Please make sure it\'s a valid Excel file.');
+        await showAlert('Error reading the Excel file. Please make sure it\'s a valid Excel file.');
         setImportStatus('idle');
       }
     };

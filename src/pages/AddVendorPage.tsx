@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { ChevronLeft } from "lucide-react";
 import Select from 'react-select';
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
 interface VendorCategory {
   CategoryID: number;
@@ -21,6 +22,7 @@ interface VendorCategory {
 const AddVendorPage = () => {
   const navigate = useNavigate();
   const { userDetails, account_id } = useContext(UserDetailsContext);
+  const { showAlert } = useAlertDialog();
 
   const [vendor, setVendor] = useState({
     name: '',
@@ -90,7 +92,7 @@ const AddVendorPage = () => {
 
     const businessID = userDetails?.BusinessID;
     if (!businessID) {
-      alert('Business ID missing. Cannot add vendor.');
+      await showAlert('Business ID missing. Cannot add vendor.');
       return;
     }
 
@@ -108,7 +110,7 @@ const AddVendorPage = () => {
       const teamContactId = match?.TeamContactID;
       console.log("Team Contact ID:", teamContactId);
       if (!teamContactId) {
-        alert("TeamContactID not found for this account");
+        await showAlert("TeamContactID not found for this account");
         return;
       }
 
@@ -130,7 +132,7 @@ const AddVendorPage = () => {
       const newContactID = contactRes.data?.ContactID;
       console.log("New Contact ID:", newContactID);
       if (!newContactID) {
-        alert("ContactID not returned after creating contact");
+        await showAlert("ContactID not returned after creating contact");
         return;
       }
 
@@ -150,7 +152,7 @@ const AddVendorPage = () => {
       navigate('/vendors');
     } catch (err: any) {
       console.error('Error:', err.response?.data || err.message);
-      alert('Failed: ' + (err.response?.data?.message || err.message));
+      await showAlert('Failed: ' + (err.response?.data?.message || err.message));
     }
   };
 
