@@ -18,10 +18,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Edit, Trash2, Plus, Building2 } from "lucide-react";
 import UserDetailsContext from '@/hooks/UserDetailsContext';
-import { Edit, Delete } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
 import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
 interface VendorCategory {
@@ -170,129 +168,188 @@ const VendorCategories: React.FC = () => {
   }, [userDetails]);
 
   return (
-    <div className="space-y-4 px-2 sm:px-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center">
-          <div className="back-button">
-            <ChevronLeft onClick={() => navigate(-1)} className="rounded-circle" />
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Vendor Categories</h1>
+                <p className="text-sm text-gray-600 mt-1">Manage your vendor categories efficiently</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Category
+            </Button>
           </div>
-          <h1 className="text-2xl font-bold">Vendor Categories</h1>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>Add Category</Button>
+
+        {/* Content Section */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="text-gray-600 mt-4">Loading categories...</p>
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="text-center py-20">
+            <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No vendor categories found</h3>
+            <p className="text-gray-600 mb-6">Get started by creating your first vendor category</p>
+            <Button 
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Category
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...categories]
+              .sort((a, b) => b.CategoryID - a.CategoryID)
+              .map((category) => (
+                <Card key={category.CategoryID} className="bg-white shadow-md hover:shadow-lg transition-all duration-200 border-0 rounded-xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">
+                          ID: {category.CategoryID}
+                        </p>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                          {category.CategoryName}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-3 min-h-[3rem]">
+                          {category.Description || 'No description provided'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-4 border-t border-gray-100">
+                      <button
+                        onClick={() => handleEditCategory(category)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCategory(category.CategoryID)}
+                        disabled={deletingCategoryId === category.CategoryID}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingCategoryId === category.CategoryID ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                        Delete
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        )}
+
+        {/* Modern Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+          <DialogContent className="sm:max-w-md w-full max-w-[95vw] mx-auto bg-white rounded-2xl shadow-2xl border-0 p-0 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                  {isEditMode ? (
+                    <>
+                      <Edit className="w-5 h-5" />
+                      Edit Category
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-5 h-5" />
+                      Add New Category
+                    </>
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+            
+            {/* Form */}
+            <div className="p-6">
+              <form onSubmit={handleAddOrUpdateCategory} className="space-y-6" noValidate>
+                <div className="space-y-2">
+                  <label htmlFor="CategoryName" className="block text-sm font-semibold text-gray-700">
+                    Category Name <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="CategoryName"
+                    name="CategoryName"
+                    value={formCategory.CategoryName}
+                    onChange={handleChange}
+                    placeholder="Enter category name"
+                    className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      missingFields.includes('CategoryName') 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    autoComplete="off"
+                  />
+                  {missingFields.includes('CategoryName') && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <span className="text-red-500">⚠</span>
+                      Category name is required
+                    </p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="Description" className="block text-sm font-semibold text-gray-700">
+                    Description
+                  </label>
+                  <Textarea
+                    id="Description"
+                    name="Description"
+                    value={formCategory.Description}
+                    onChange={handleChange}
+                    placeholder="Enter description (optional)"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 resize-none"
+                    rows={4}
+                    autoComplete="off"
+                  />
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleDialogClose}
+                    className="flex-1 sm:flex-none sm:min-w-[120px] px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    className="flex-1 sm:flex-none sm:min-w-[120px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    {isEditMode ? 'Update Category' : 'Add Category'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {loading ? (
-  <div className="text-center text-muted-foreground">Loading categories...</div>
-) : categories.length === 0 ? (
-  <div className="text-center text-muted-foreground">No vendor categories found</div>
-) : (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-4">
-    {[...categories]
-      .sort((a, b) => b.CategoryID - a.CategoryID)
-      .map((category) => (
-        <Card key={category.CategoryID} className="bg-white shadow rounded-xl border border-gray-200 p-6 flex flex-col justify-between min-h-[200px]">
-          <CardContent className="p-0 flex-1 flex flex-col">
-            <div className="mb-2">
-              <div className="text-xs text-gray-400 mb-1">ID: {category.CategoryID}</div>
-              <div className="text-xl font-extrabold text-gray-900 mb-2">{category.CategoryName}</div>
-              <div className="text-base text-gray-700 mb-4">{category.Description || 'No description'}</div>
-            </div>
-            <div className="flex gap-4 mt-auto">
-              <button
-                className="flex-1 py-2 border border-gray-300 rounded-lg bg-white text-base font-semibold text-gray-900 hover:bg-gray-50 transition"
-                onClick={() => handleEditCategory(category)}
-              >
-                Edit
-              </button>
-              <button
-                className="flex-1 py-2 border border-gray-300 rounded-lg bg-white text-base font-semibold text-red-600 hover:bg-red-50 transition"
-                onClick={() => handleDeleteCategory(category.CategoryID)}
-                disabled={deletingCategoryId === category.CategoryID}
-              >
-                Delete
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-  </div>
-)}
-
-      {/* Add/Edit Category Dialog - Improved Styling */}
-    <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-  <DialogContent className="vendor-category-dialog DialogContent sm:max-w-md w-full mx-4 bg-white border border-gray-200 shadow-2xl rounded-2xl p-0 overflow-hidden">
-    <div className="DialogHeader bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-      <DialogHeader>
-        <DialogTitle className="DialogTitle text-xl font-bold text-white">
-          {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
-        </DialogTitle>
-      </DialogHeader>
-    </div>
-    
-    <div className="DialogForm p-6">
-      <form onSubmit={handleAddOrUpdateCategory} className="space-y-5" noValidate>
-        <div className="space-y-2">
-          <label htmlFor="CategoryName" className="block text-sm font-semibold text-gray-700">
-            Category Name <span className="text-red-500">*</span>
-          </label>
-          <Input
-            id="CategoryName"
-            name="CategoryName"
-            value={formCategory.CategoryName}
-            onChange={handleChange}
-            placeholder="Enter category name"
-            className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              missingFields.includes('CategoryName') 
-                ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                : 'border-gray-300 hover:border-gray-400'
-            }`}
-            autoComplete="off"
-          />
-          {missingFields.includes('CategoryName') && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <span className="text-red-500">⚠</span>
-              This field is required
-            </p>
-          )}
-        </div>
-        
-        <div className="space-y-2">
-          <label htmlFor="Description" className="block text-sm font-semibold text-gray-700">
-            Description
-          </label>
-          <Textarea
-            id="Description"
-            name="Description"
-            value={formCategory.Description}
-            onChange={handleChange}
-            placeholder="Enter description (optional)"
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 resize-none"
-            rows={3}
-            autoComplete="off"
-          />
-        </div>
-        
-        {/* Fixed button container with proper flexbox */}
-        <div className="DialogActions flex flex-row items-center justify-end gap-3 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleDialogClose}
-            className="cancel-btn min-w-[100px] px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit"
-            className="update-btn min-w-[100px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            {isEditMode ? 'Update' : 'Add'}
-          </Button>
-        </div>
-      </form>
-    </div>
-  </DialogContent>
-</Dialog>
     </div>
   );
 };
