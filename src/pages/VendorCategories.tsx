@@ -220,7 +220,7 @@ const VendorCategories: React.FC = () => {
 
       {/* Add/Edit Category Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}</DialogTitle>
           </DialogHeader>
