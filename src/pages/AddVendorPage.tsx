@@ -10,6 +10,17 @@ import { Label } from '@/components/ui/label';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { ChevronLeft } from "lucide-react";
 import Select from 'react-select';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 
 interface VendorCategory {
   CategoryID: number;
@@ -37,6 +48,7 @@ const AddVendorPage = () => {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [alertDialog, setAlertDialog] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
 
   const buildPOUrl = (path: string) => account_id ? `${path}?account_id=${account_id}` : path;
 
@@ -90,7 +102,7 @@ const AddVendorPage = () => {
 
     const businessID = userDetails?.BusinessID;
     if (!businessID) {
-      alert('Business ID missing. Cannot add vendor.');
+      setAlertDialog({ open: true, message: 'Business ID missing. Cannot add vendor.' });
       return;
     }
 
@@ -108,7 +120,7 @@ const AddVendorPage = () => {
       const teamContactId = match?.TeamContactID;
       console.log("Team Contact ID:", teamContactId);
       if (!teamContactId) {
-        alert("TeamContactID not found for this account");
+        setAlertDialog({ open: true, message: "TeamContactID not found for this account" });
         return;
       }
 
@@ -130,7 +142,7 @@ const AddVendorPage = () => {
       const newContactID = contactRes.data?.ContactID;
       console.log("New Contact ID:", newContactID);
       if (!newContactID) {
-        alert("ContactID not returned after creating contact");
+        setAlertDialog({ open: true, message: "ContactID not returned after creating contact" });
         return;
       }
 
@@ -150,7 +162,7 @@ const AddVendorPage = () => {
       navigate('/vendors');
     } catch (err: any) {
       console.error('Error:', err.response?.data || err.message);
-      alert('Failed: ' + (err.response?.data?.message || err.message));
+      setAlertDialog({ open: true, message: 'Failed: ' + (err.response?.data?.message || err.message) });
     }
   };
 
@@ -220,6 +232,17 @@ const AddVendorPage = () => {
           </form>
         </CardContent>
       </Card>
+      <AlertDialog open={alertDialog.open} onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Notice</AlertDialogTitle>
+            <AlertDialogDescription>{alertDialog.message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertDialog({ open: false, message: "" })}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

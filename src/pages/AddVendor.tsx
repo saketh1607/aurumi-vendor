@@ -4,6 +4,17 @@ import { useNavigate, useLocation } from "react-router-dom";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
 import { useRef } from "react";
 import Papa from "papaparse";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 
 const AddVendor = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +40,7 @@ const AddVendor = () => {
   const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false);
   const serviceTypeRef = useRef<HTMLDivElement>(null);
   const accountId = userDetails?.userDetails?.AccountID || "";
+  const [alertDialog, setAlertDialog] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -206,10 +218,10 @@ const AddVendor = () => {
             console.error("Failed to import vendor:", payload, error);
           }
         }
-        alert("CSV import completed!");
+        setAlertDialog({ open: true, message: "CSV import completed!" });
       },
       error: (err) => {
-        alert("Failed to parse CSV: " + err.message);
+        setAlertDialog({ open: true, message: "Failed to parse CSV: " + err.message });
       }
     });
   };
@@ -397,6 +409,17 @@ const AddVendor = () => {
           <div className="text-sm text-center text-gray-700 mt-3">{message}</div>
         )}
       </form>
+      <AlertDialog open={alertDialog.open} onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Notice</AlertDialogTitle>
+            <AlertDialogDescription>{alertDialog.message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertDialog({ open: false, message: "" })}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

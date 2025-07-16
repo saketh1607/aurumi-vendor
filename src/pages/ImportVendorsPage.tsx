@@ -8,6 +8,17 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { ChevronLeft, Download, Upload, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 
 interface VendorImportData {
   'Vendor Name': string;
@@ -43,6 +54,7 @@ const ImportVendorsPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'validating' | 'ready' | 'importing' | 'success' | 'error'>('idle');
   const [importResults, setImportResults] = useState<Array<{success: boolean, vendor: string, message?: string}>>([]);
+  const [alertDialog, setAlertDialog] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
 
   const buildPOUrl = (path: string) => account_id ? `${path}?account_id=${account_id}` : path;
 
@@ -161,7 +173,7 @@ const ImportVendorsPage = () => {
     ];
     
     if (!validTypes.includes(file.type)) {
-      alert('Please select a valid Excel file (.xlsx or .xls)');
+      setAlertDialog({ open: true, message: 'Please select a valid Excel file (.xlsx or .xls)' });
       setImportStatus('idle');
       return;
     }
@@ -186,7 +198,7 @@ const ImportVendorsPage = () => {
         ];
         
         if (jsonData.length === 0) {
-          alert('The Excel file is empty. Please add vendor data and try again.');
+          setAlertDialog({ open: true, message: 'The Excel file is empty. Please add vendor data and try again.' });
           setImportStatus('idle');
           return;
         }
@@ -195,7 +207,7 @@ const ImportVendorsPage = () => {
         const missingColumns = requiredColumns.filter(col => !(col in firstRow));
         
         if (missingColumns.length > 0) {
-          alert(`Missing required columns: ${missingColumns.join(', ')}\n\nPlease download the sample template to see the correct format.`);
+          setAlertDialog({ open: true, message: `Missing required columns: ${missingColumns.join(', ')}\n\nPlease download the sample template to see the correct format.` });
           setImportStatus('idle');
           return;
         }
@@ -219,7 +231,7 @@ const ImportVendorsPage = () => {
         
       } catch (error) {
         console.error('Error reading Excel file:', error);
-        alert('Error reading the Excel file. Please make sure it\'s a valid Excel file.');
+        setAlertDialog({ open: true, message: 'Error reading the Excel file. Please make sure it\'s a valid Excel file.' });
         setImportStatus('idle');
       }
     };
@@ -557,6 +569,18 @@ const ImportVendorsPage = () => {
           </AlertDescription>
         </Alert>
       )}
+
+      <AlertDialog open={alertDialog.open} onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Notice</AlertDialogTitle>
+            <AlertDialogDescription>{alertDialog.message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertDialog({ open: false, message: "" })}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

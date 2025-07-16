@@ -27,6 +27,17 @@ import {
 import ExportDropdown from './ExportDropdown';
 
 import { CSVLink } from "react-csv";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 interface Vendor {
   VendorID: number;
   Name: string;
@@ -227,14 +238,14 @@ const { id: VendorID } = useParams();
       );
 
       if (res.data?.RetString === '1') {
-        alert("Vendor deleted successfully.");
+        setAlertDialog({ open: true, message: "Vendor deleted successfully." });
         fetchVendors();
       } else {
-        alert("Vendor is already in use. You can't delete it.");
+        setAlertDialog({ open: true, message: "Vendor is already in use. You can't delete it." });
       }
     } catch (error: any) {
       console.error("Error deleting vendor:", error?.response?.data || error.message);
-      alert("Failed to delete vendor due to a server error.");
+      setAlertDialog({ open: true, message: "Failed to delete vendor due to a server error." });
     } finally {
       setDeletingVendorId(null);
     }
@@ -292,7 +303,7 @@ const { id: VendorID } = useParams();
   setMissingFields(missing);
 
   if (missing.length > 0) {
-    alert("Please fill all required fields: " + missing.join(", "));
+    setAlertDialog({ open: true, message: "Please fill all required fields: " + missing.join(", ") });
     return;
   }
 
@@ -334,11 +345,11 @@ const { id: VendorID } = useParams();
       throw new Error((data && data.message) || `Failed to update vendor: ${res.statusText}`);
     }
 
-    alert("Vendor updated successfully.");
+    setAlertDialog({ open: true, message: "Vendor updated successfully." });
     closeEditDialog();
     fetchVendors();
   } catch (err: any) {
-    alert("Error updating vendor: " + (err.message || "Unknown error"));
+    setAlertDialog({ open: true, message: "Error updating vendor: " + (err.message || "Unknown error") });
   } finally {
     setUpdateLoading(false);
   }
@@ -371,7 +382,7 @@ const { id: VendorID } = useParams();
       XLSX.writeFile(wb, `vendors.${type === "csv" ? "csv" : "xlsx"}`);
     } else if (type === "pdf") {
       if (!exportData.length) {
-        alert("No data to export.");
+        setAlertDialog({ open: true, message: "No data to export." });
         return;
       }
        const doc = new jsPDF();
@@ -743,6 +754,17 @@ const { id: VendorID } = useParams();
           </div>
         </div>
       )}
+      <AlertDialog open={alertDialog.open} onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Notice</AlertDialogTitle>
+      <AlertDialogDescription>{alertDialog.message}</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogAction onClick={() => setAlertDialog({ open: false, message: "" })}>OK</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
     </div>
   );
 };
