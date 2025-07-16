@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft, Loader2, Search } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import UserDetailsContext from '@/hooks/UserDetailsContext';
 import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
@@ -33,8 +33,6 @@ interface VendorCategory {
 const VendorCategories: React.FC = () => {
   const { userDetails } = useContext(UserDetailsContext);
   const [categories, setCategories] = useState<VendorCategory[]>([]);
-  const [filteredCategories, setFilteredCategories] = useState<VendorCategory[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -60,7 +58,6 @@ const VendorCategories: React.FC = () => {
         payload
       );
       setCategories(response.data || []);
-      setFilteredCategories(response.data || []);
     } catch (error) {
       console.error('Error fetching vendor categories:', error);
       await showAlert('Failed to fetch vendor categories.');
@@ -68,19 +65,6 @@ const VendorCategories: React.FC = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredCategories(categories);
-    } else {
-      const filtered = categories.filter(category =>
-        category.CategoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        category.Description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        category.CategoryID.toString().includes(searchTerm)
-      );
-      setFilteredCategories(filtered);
-    }
-  }, [searchTerm, categories]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormCategory({ ...formCategory, [e.target.name]: e.target.value });
@@ -203,55 +187,25 @@ const VendorCategories: React.FC = () => {
         </Button>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-8 relative">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search categories by name, ID or description..."
-            className="pl-10 pr-4 py-3 w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
           <span className="sr-only">Loading...</span>
         </div>
-      ) : filteredCategories.length === 0 ? (
+      ) : categories.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <h3 className="text-xl font-medium text-gray-700 mb-4">
-            {searchTerm ? 'No matching categories found' : 'No vendor categories found'}
-          </h3>
-          <p className="text-gray-500 mb-6">
-            {searchTerm 
-              ? 'Try a different search term' 
-              : 'Create your first category to organize your vendors'}
-          </p>
-          {!searchTerm && (
-            <Button 
-              onClick={() => setIsDialogOpen(true)} 
-              className="bg-blue-600 hover:bg-blue-700 px-6 py-3 text-lg"
-            >
-              Create Category
-            </Button>
-          )}
+          <h3 className="text-xl font-medium text-gray-700 mb-4">No vendor categories found</h3>
+          <p className="text-gray-500 mb-6">Create your first category to organize your vendors</p>
+          <Button 
+            onClick={() => setIsDialogOpen(true)} 
+            className="bg-blue-600 hover:bg-blue-700 px-6 py-3 text-lg"
+          >
+            Create Category
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...filteredCategories]
+          {[...categories]
             .sort((a, b) => b.CategoryID - a.CategoryID)
             .map((category) => (
               <Card 
@@ -303,81 +257,77 @@ const VendorCategories: React.FC = () => {
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-xl">
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <DialogHeader className="p-6 border-b border-gray-200">
-                <DialogTitle className="text-xl font-bold text-gray-900">
-                  {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
-                </DialogTitle>
-                <DialogDescription className="text-gray-600">
-                  {isEditMode 
-                    ? 'Update the details of this vendor category' 
-                    : 'Add a new vendor category to organize your vendors'}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <form onSubmit={handleAddOrUpdateCategory} className="p-6 space-y-6">
-                <div className="space-y-3">
-                  <label 
-                    htmlFor="CategoryName" 
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Category Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    id="CategoryName"
-                    name="CategoryName"
-                    value={formCategory.CategoryName}
-                    onChange={handleChange}
-                    placeholder="e.g. Plumbing, IT Services"
-                    className={`text-base py-3 px-4 ${missingFields.includes('CategoryName') ? 'border-red-500 focus:ring-red-500' : ''}`}
-                    autoComplete="off"
-                    autoFocus
-                  />
-                  {missingFields.includes('CategoryName') && (
-                    <p className="text-sm text-red-600 mt-1">
-                      Category name is required
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-3">
-                  <label 
-                    htmlFor="Description" 
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Description
-                  </label>
-                  <Textarea
-                    id="Description"
-                    name="Description"
-                    value={formCategory.Description}
-                    onChange={handleChange}
-                    placeholder="Describe this category (optional)"
-                    className="text-base py-3 px-4 min-h-[120px]"
-                    autoComplete="off"
-                  />
-                </div>
-                
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={handleDialogClose}
-                    className="px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit"
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isEditMode ? 'Save Changes' : 'Add Category'}
-                  </Button>
-                </div>
-              </form>
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              {isEditMode 
+                ? 'Update the details of this vendor category' 
+                : 'Add a new vendor category to organize your vendors'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleAddOrUpdateCategory} className="space-y-6">
+            <div className="space-y-3">
+              <label 
+                htmlFor="CategoryName" 
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Category Name <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="CategoryName"
+                name="CategoryName"
+                value={formCategory.CategoryName}
+                onChange={handleChange}
+                placeholder="e.g. Plumbing, IT Services"
+                className={`text-base py-3 px-4 ${missingFields.includes('CategoryName') ? 'border-red-500 focus:ring-red-500' : ''}`}
+                autoComplete="off"
+                autoFocus
+              />
+              {missingFields.includes('CategoryName') && (
+                <p className="text-sm text-red-600 mt-1">
+                  Category name is required
+                </p>
+              )}
             </div>
-          </div>
+            
+            <div className="space-y-3">
+              <label 
+                htmlFor="Description" 
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Description
+              </label>
+              <Textarea
+                id="Description"
+                name="Description"
+                value={formCategory.Description}
+                onChange={handleChange}
+                placeholder="Describe this category (optional)"
+                className="text-base py-3 px-4 min-h-[120px]"
+                autoComplete="off"
+              />
+            </div>
+            
+            <DialogFooter className="gap-3 sm:gap-4 mt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleDialogClose}
+                className="w-full sm:w-auto px-6 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700"
+              >
+                {isEditMode ? 'Save Changes' : 'Add Category'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
