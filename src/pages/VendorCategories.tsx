@@ -178,7 +178,7 @@ const VendorCategories: React.FC = () => {
         >
           <ChevronLeft className="h-6 w-6" />
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900">Vendor Categories</h1>
+        <h1 className="text-xl font-bold text-gray-900">Vendor Categories</h1>
         <Button 
           onClick={() => setIsDialogOpen(true)} 
           className="ml-auto bg-blue-600 hover:bg-blue-700"
