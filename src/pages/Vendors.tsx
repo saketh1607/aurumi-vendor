@@ -350,7 +350,7 @@ const { id: VendorID } = useParams();
     return found ? found.CategoryName : "";
   };
 
-  const handleExport = (type: "csv" | "pdf" | "xlsx") => {
+  const handleExport = async (type: "csv" | "pdf" | "xlsx") => {
     if (!vendors || vendors.length === 0) return;
   
     // Prepare export data (remove Category and Contact Person, use correct API fields)
