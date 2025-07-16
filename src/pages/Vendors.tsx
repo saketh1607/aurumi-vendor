@@ -485,8 +485,7 @@ const { id: VendorID } = useParams();
         {!loading && filteredVendors.length === 0 && (
           <div className="text-center text-muted-foreground mt-8"></div>
         )}
-
-        {[...filteredVendors]
+    {[...filteredVendors]
   .sort((a, b) => b.VendorID - a.VendorID)
   .map((vendor) => (
     <Card key={vendor.VendorID} className="hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
@@ -535,30 +534,30 @@ const { id: VendorID } = useParams();
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-end gap-3 p-4 pt-0 border-t">
-        <Button
-          variant="outline"
-          className="h-9 px-4 py-2 text-sm font-medium"
+      {/* Simple div instead of CardFooter */}
+      <div className="flex justify-end gap-3 p-4 pt-0">
+        <button
+          className="border border-gray-300 text-gray-700 font-medium px-4 py-1.5 rounded-md hover:bg-gray-50 transition-colors text-sm"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
           }}
         >
           Edit
-        </Button>
-        <Button
-          variant="destructive"
-          className="h-9 px-4 py-2 text-sm font-medium"
+        </button>
+        <button
+          className="border border-red-300 text-red-600 font-medium px-4 py-1.5 rounded-md hover:bg-red-50 transition-colors text-sm"
           onClick={(e) => {
             e.stopPropagation();
             handleDeleteVendor(vendor.VendorID);
           }}
         >
           Delete
-        </Button>
-      </CardFooter>
+        </button>
+      </div>
     </Card>
-  ))}      </div>
+  ))}
+    </div>
 
 
 
