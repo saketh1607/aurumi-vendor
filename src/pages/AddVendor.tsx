@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import UserDetailsContext from "@/hooks/UserDetailsContext";
 import { useRef } from "react";
 import Papa from "papaparse";
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
 const AddVendor = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +30,7 @@ const AddVendor = () => {
   const [showVendorTypeSuggestions, setShowVendorTypeSuggestions] = useState(false);
   const serviceTypeRef = useRef<HTMLDivElement>(null);
   const accountId = userDetails?.userDetails?.AccountID || "";
+  const { showAlert } = useAlertDialog();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -206,10 +208,10 @@ const AddVendor = () => {
             console.error("Failed to import vendor:", payload, error);
           }
         }
-        alert("CSV import completed!");
+        await showAlert("CSV import completed!");
       },
       error: (err) => {
-        alert("Failed to parse CSV: " + err.message);
+        await showAlert("Failed to parse CSV: " + err.message);
       }
     });
   };
