@@ -487,74 +487,78 @@ const { id: VendorID } = useParams();
         )}
 
         {[...filteredVendors]
-          .sort((a, b) => b.VendorID - a.VendorID)
-          .map((vendor) => (
-            <Card key={vendor.VendorID} className="hover:shadow-md transition flex flex-col justify-between h-full">
-              <CardContent className="p-4 space-y-2 flex-1">
-                <div className="text-2xl">
-                  <strong>{vendor.Name}</strong>
-                </div>
-                <div className="relative w-full">
-                  {vendor.Status && (
-                    <div
-                      className={`absolute top-0 right-0 text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
-                        vendor.Status.toLowerCase() === "active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {vendor.Status}
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 break-words">
-                  <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
-                    {vendor.VendorType}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-2 text-sm w-full">
-                  <div className="flex items-center gap-2 min-w-0 break-words">
-                    <Phone className="w-4 h-4 text-gray-600" />
-                    {vendor.MobileNo}
-                  </div>
-                  <div className="flex items-center gap-2 min-w-0 break-words">
-                    <Mail className="w-4 h-4 text-gray-600" />
-                    <span>{vendor.EmailId}</span>
-                  </div>
-                  <div className="flex items-center gap-2 min-w-0 break-words">
-                    <MapPin className="w-4 h-4 text-gray-600 shrink-0" />
-                    <span>{vendor.Address}</span>
-                  </div>
-                  <div className="flex items-center gap-2 break-words">
-                    <StickyNote className="w-4 h-4 text-gray-600 shrink-0" />
-                    <span>{vendor.Notes || "N/A"}</span>
-                  </div>
-                </div>
-              </CardContent>
-             <div className="flex justify-end gap-3 mt-4 px-4 pb-4">
-  <button
-    className="border border-gray-300 text-gray-700 font-medium px-4 py-1.5 rounded-md hover:bg-gray-50 transition-colors"
-    onClick={(e) => {
-      e.stopPropagation();
-      navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
-    }}
-  >
-    Edit
-  </button>
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handleDeleteVendor(vendor.VendorID);
-    }}
-    className="border border-red-300 text-red-600 font-medium px-4 py-1.5 rounded-md hover:bg-red-50 transition-colors min-w-[70px]"
-  >
-    Delete
-  </button>
-</div>
+  .sort((a, b) => b.VendorID - a.VendorID)
+  .map((vendor) => (
+    <Card key={vendor.VendorID} className="hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
+      <CardContent className="p-5 flex-1">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-xl font-bold text-gray-900">{vendor.Name}</h3>
+          {vendor.Status && (
+            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+              vendor.Status.toLowerCase() === "active"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}>
+              {vendor.Status}
+            </span>
+          )}
+        </div>
 
-            </Card>
-          ))}
-      </div>
+        <div className="mb-3">
+          <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+            {vendor.VendorType}
+          </span>
+        </div>
+
+        <div className="space-y-2.5 text-sm text-gray-700">
+          <div className="flex items-start gap-2">
+            <Phone className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+            <span>{vendor.MobileNo}</span>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <Mail className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+            <span className="break-all">{vendor.EmailId}</span>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <MapPin className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+            <span>{vendor.Address}</span>
+          </div>
+          
+          {vendor.Notes && (
+            <div className="flex items-start gap-2 pt-1">
+              <StickyNote className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+              <span className="text-gray-600">{vendor.Notes}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      <CardFooter className="flex justify-end gap-3 p-4 pt-0 border-t">
+        <Button
+          variant="outline"
+          className="h-9 px-4 py-2 text-sm font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
+          }}
+        >
+          Edit
+        </Button>
+        <Button
+          variant="destructive"
+          className="h-9 px-4 py-2 text-sm font-medium"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDeleteVendor(vendor.VendorID);
+          }}
+        >
+          Delete
+        </Button>
+      </CardFooter>
+    </Card>
+  ))}      </div>
 
 
 
