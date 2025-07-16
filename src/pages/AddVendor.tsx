@@ -208,10 +208,10 @@ const AddVendor = () => {
             console.error("Failed to import vendor:", payload, error);
           }
         }
-        await showAlert("CSV import completed!");
+        showAlert("CSV import completed!");
       },
       error: (err) => {
-        await showAlert("Failed to parse CSV: " + err.message);
+        showAlert("Failed to parse CSV: " + err.message);
       }
     });
   };
