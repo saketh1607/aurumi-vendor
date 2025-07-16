@@ -580,172 +580,172 @@ const { id: VendorID } = useParams();
 
 
       {/* Edit Dialog - mobile responsive */}
-      {editingVendor && (
-        <div
-          className="z-[9999] fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-auto"
-          onClick={closeEditDialog}
-        >
-          <div
-            className="bg-white rounded-md p-4 sm:p-6 w-full max-w-lg max-h-full overflow-auto shadow-lg sm:mx-auto sm:my-auto"
-            onClick={(e) => e.stopPropagation()}
-            style={{ minWidth: "280px" }}
-          >
-            <button
-              className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
-              onClick={closeEditDialog}
-              aria-label="Close edit vendor dialog"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
+{editingVendor && (
+  <div
+    className="z-[9999] fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-auto"
+    onClick={closeEditDialog}
+  >
+    <div
+      className="bg-white rounded-md p-4 sm:p-6 w-full max-w-lg max-h-full overflow-auto shadow-lg sm:mx-auto sm:my-auto"
+      onClick={(e) => e.stopPropagation()}
+      style={{ minWidth: "280px" }}
+    >
+      <button
+        className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
+        onClick={closeEditDialog}
+        aria-label="Close edit vendor dialog"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
 
-            <h2 className="text-xl font-semibold mb-4">Edit Vendor</h2>
+      <h2 className="text-xl font-semibold mb-4">Edit Vendor</h2>
 
-            <form onSubmit={handleUpdateSubmit} className="space-y-4" noValidate>
-              <div>
-                <label htmlFor="Name" className="block font-medium mb-1">
-                  Vendor Name<span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="Name"
-                  name="Name"
-                  value={editingVendor.Name}
-                  onChange={handleInputChange}
-                  className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("Name") ? "border-red-500" : "border-gray-300"}`}
-                  autoComplete="off"
-                />
-                {missingFields.includes("Name") && (
-                  <span className="text-xs text-red-500">This field is required.</span>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="CategoryID" className="block font-medium mb-1">
-                  Category<span className="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  id="CategoryID"
-                  name="CategoryID"
-                  value={editingVendor.CategoryID}
-                  onChange={handleInputChange}
-                  className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("CategoryID") ? "border-red-500" : "border-gray-300"}`}
-                  autoComplete="off"
-                >
-                  <option value="">
-                    {editingVendor.CategoryID
-                      ? getCategoryNameById(editingVendor.CategoryID) || "Select Category"
-                      : "Select Category"}
-                  </option>
-                  {categories.map((cat) => (
-                    <option key={cat.CategoryID} value={cat.CategoryID}>
-                      {cat.CategoryName}
-                    </option>
-                  ))}
-                </select>
-                {missingFields.includes("CategoryID") && (
-                  <span className="text-xs text-red-500">This field is required.</span>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="ContactNumber" className="block font-medium mb-1">
-                  Contact Number<span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="tel"
-                  id="ContactNumber"
-                  name="ContactNumber"
-                  value={editingVendor.ContactNumber}
-                  onChange={handleInputChange}
-                  className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("ContactNumber") ? "border-red-500" : "border-gray-300"}`}
-                  autoComplete="off"
-                />
-                {missingFields.includes("ContactNumber") && (
-                  <span className="text-xs text-red-500">This field is required.</span>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="Email" className="block font-medium mb-1">
-                  Email<span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="Email"
-                  name="Email"
-                  value={editingVendor.Email}
-                  onChange={handleInputChange}
-                  className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("Email") ? "border-red-500" : "border-gray-300"}`}
-                  autoComplete="off"
-                />
-                {missingFields.includes("Email") && (
-                  <span className="text-xs text-red-500">This field is required.</span>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="ContactPerson" className="block font-medium mb-1">
-                  Contact Person<span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="ContactPerson"
-                  name="ContactPerson"
-                  value={editingVendor.ContactPerson}
-                  onChange={handleInputChange}
-                  className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("ContactPerson") ? "border-red-500" : "border-gray-300"}`}
-                  autoComplete="off"
-                />
-                {missingFields.includes("ContactPerson") && (
-                  <span className="text-xs text-red-500">This field is required.</span>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="Address" className="block font-medium mb-1">
-                  Address<span className="text-red-500 ml-1">*</span>
-                </label>
-                <textarea
-                  id="Address"
-                  name="Address"
-                  value={editingVendor.Address}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("Address") ? "border-red-500" : "border-gray-300"}`}
-                  autoComplete="off"
-                />
-                {missingFields.includes("Address") && (
-                  <span className="text-xs text-red-500">This field is required.</span>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="Notes" className="block font-medium mb-1">
-                  Notes
-                </label>
-                <textarea
-                  id="Notes"
-                  name="Notes"
-                  value={editingVendor.Notes}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  autoComplete="off"
-                />
-              </div>
-
-              <div className="flex justify-between space-x-2">
-                <Button type="button" variant="outline" className="custom-cancel-button" onClick={closeEditDialog} disabled={updateLoading}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={updateLoading}>
-                  {updateLoading ? "Updating..." : "Update Vendor"}
-                </Button>
-              </div>
-            </form>
-          </div>
+      <form onSubmit={handleUpdateSubmit} className="space-y-4" noValidate>
+        <div>
+          <label htmlFor="Name" className="block font-medium mb-1">
+            Vendor Name<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            type="text"
+            id="Name"
+            name="Name"
+            value={editingVendor.Name}
+            onChange={handleInputChange}
+            className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("Name") ? "border-red-500" : "border-gray-300"}`}
+            autoComplete="off"
+          />
+          {missingFields.includes("Name") && (
+            <span className="text-xs text-red-500">This field is required.</span>
+          )}
         </div>
-      )}
+
+        <div>
+          <label htmlFor="CategoryID" className="block font-medium mb-1">
+            Category<span className="text-red-500 ml-1">*</span>
+          </label>
+          <select
+            id="CategoryID"
+            name="CategoryID"
+            value={editingVendor.CategoryID}
+            onChange={handleInputChange}
+            className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("CategoryID") ? "border-red-500" : "border-gray-300"}`}
+            autoComplete="off"
+          >
+            <option value="">
+              {editingVendor.CategoryID
+                ? getCategoryNameById(editingVendor.CategoryID) || "Select Category"
+                : "Select Category"}
+            </option>
+            {categories.map((cat) => (
+              <option key={cat.CategoryID} value={cat.CategoryID}>
+                {cat.CategoryName}
+              </option>
+            ))}
+          </select>
+          {missingFields.includes("CategoryID") && (
+            <span className="text-xs text-red-500">This field is required.</span>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="ContactNumber" className="block font-medium mb-1">
+            Contact Number<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            type="tel"
+            id="ContactNumber"
+            name="ContactNumber"
+            value={editingVendor.ContactNumber}
+            onChange={handleInputChange}
+            className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("ContactNumber") ? "border-red-500" : "border-gray-300"}`}
+            autoComplete="off"
+          />
+          {missingFields.includes("ContactNumber") && (
+            <span className="text-xs text-red-500">This field is required.</span>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="Email" className="block font-medium mb-1">
+            Email<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            type="email"
+            id="Email"
+            name="Email"
+            value={editingVendor.Email}
+            onChange={handleInputChange}
+            className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("Email") ? "border-red-500" : "border-gray-300"}`}
+            autoComplete="off"
+          />
+          {missingFields.includes("Email") && (
+            <span className="text-xs text-red-500">This field is required.</span>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="ContactPerson" className="block font-medium mb-1">
+            Contact Person<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            type="text"
+            id="ContactPerson"
+            name="ContactPerson"
+            value={editingVendor.ContactPerson}
+            onChange={handleInputChange}
+            className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("ContactPerson") ? "border-red-500" : "border-gray-300"}`}
+            autoComplete="off"
+          />
+          {missingFields.includes("ContactPerson") && (
+            <span className="text-xs text-red-500">This field is required.</span>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="Address" className="block font-medium mb-1">
+            Address<span className="text-red-500 ml-1">*</span>
+          </label>
+          <textarea
+            id="Address"
+            name="Address"
+            value={editingVendor.Address}
+            onChange={handleInputChange}
+            rows={2}
+            className={`w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${missingFields.includes("Address") ? "border-red-500" : "border-gray-300"}`}
+            autoComplete="off"
+          />
+          {missingFields.includes("Address") && (
+            <span className="text-xs text-red-500">This field is required.</span>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="Notes" className="block font-medium mb-1">
+            Notes
+          </label>
+          <textarea
+            id="Notes"
+            name="Notes"
+            value={editingVendor.Notes}
+            onChange={handleInputChange}
+            rows={2}
+            className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            autoComplete="off"
+          />
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" className="custom-cancel-button" onClick={closeEditDialog} disabled={updateLoading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={updateLoading}>
+            {updateLoading ? "Updating..." : "Update Vendor"}
+          </Button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };
