@@ -43,7 +43,7 @@ const VendorCategories: React.FC = () => {
     Description: '',
   });
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const { showAlert } = useAlertDialog();
+  const { showAlert, showConfirm } = useAlertDialog();
 
   const navigate = useNavigate();
 
@@ -138,7 +138,7 @@ const VendorCategories: React.FC = () => {
   };
 
   const handleDeleteCategory = async (categoryID: number) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    if (!(await showConfirm('Are you sure you want to delete this category?'))) return;
     setDeletingCategoryId(categoryID);
 
     try {
