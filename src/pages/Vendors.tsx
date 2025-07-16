@@ -84,6 +84,7 @@ const Vendors: React.FC = () => {
   const userDetails = useContext(UserDetailsContext);
   const { hasFeature, isLoading: featureFlagsLoading } = useFeatureFlags();
   const [searchQuery, setSearchQuery] = useState("");
+  const [alertDialog, setAlertDialog] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
   const queryParams = new URLSearchParams(location.search);
   const accountId = queryParams.get('account_id');
   const buildPOUrl = (path: string) =>
