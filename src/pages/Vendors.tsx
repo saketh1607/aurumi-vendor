@@ -489,90 +489,68 @@ const { id: VendorID } = useParams();
         {[...filteredVendors]
           .sort((a, b) => b.VendorID - a.VendorID)
           .map((vendor) => (
-            <Card key={vendor.VendorID} className="hover:shadow-md transition">
-              <CardContent className="p-4 space-y-2">
+            <Card key={vendor.VendorID} className="hover:shadow-md transition flex flex-col justify-between h-full">
+              <CardContent className="p-4 space-y-2 flex-1">
                 <div className="text-2xl">
                   <strong>{vendor.Name}</strong>
-                  
                 </div>
-    <div className="relative w-full">
-      {vendor.Status && (
-        <div
-          className={`absolute top-0 right-0 text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
-            vendor.Status.toLowerCase() === "active"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {vendor.Status}
-        </div>
-      )}
-    </div>
-
-
-                {/* <div className="text-sm">
-                  <strong>ID: </strong>
-                  {vendor.VendorID}
-                </div> */}
-
-
-                 <div className="min-w-0 break-words">
-    
-    <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
-      {vendor.VendorType}
-    </span>
-  </div>
-         <div className="flex flex-col gap-2 text-sm w-full">
-    {/* <div className="min-w-0 break-words">
-      {vendor.VendorContactID}
-    </div> */}
-    <div className="flex items-center gap-2 min-w-0 break-words">
-        <Phone className="w-4 h-4 text-gray-600" />
-        {vendor.MobileNo}
-    </div>
-<div className="flex items-center gap-2 min-w-0 break-words">
-  <Mail className="w-4 h-4 text-gray-600" />
-  <span>{vendor.EmailId}</span>
-</div>
-
-<div className="flex items-center gap-2 min-w-0 break-words">
-        <MapPin className="w-4 h-4 text-gray-600 shrink-0" />
-        <span>{vendor.Address}</span>
-    </div>
-    <div className="flex items-center gap-2 break-words">
-  <StickyNote className="w-4 h-4 text-gray-600 shrink-0" />
-  <span>{vendor.Notes || "N/A"}</span>
-</div>
-
-
-  </div>
-
-                <div className="flex space-x-2 mt-2">
-      <div>
-        <button
-          className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
-          }}
-        >
-          Edit
-        </button>
-      </div>
-      <div className="flex justify-end flex-1">
-        <button
-         onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteVendor(vendor.VendorID);
-                }}
-          className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px] text-center"
-        
-        >
-          Delete
-        </button>
-      </div>
-    </div>
+                <div className="relative w-full">
+                  {vendor.Status && (
+                    <div
+                      className={`absolute top-0 right-0 text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
+                        vendor.Status.toLowerCase() === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {vendor.Status}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 break-words">
+                  <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+                    {vendor.VendorType}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2 text-sm w-full">
+                  <div className="flex items-center gap-2 min-w-0 break-words">
+                    <Phone className="w-4 h-4 text-gray-600" />
+                    {vendor.MobileNo}
+                  </div>
+                  <div className="flex items-center gap-2 min-w-0 break-words">
+                    <Mail className="w-4 h-4 text-gray-600" />
+                    <span>{vendor.EmailId}</span>
+                  </div>
+                  <div className="flex items-center gap-2 min-w-0 break-words">
+                    <MapPin className="w-4 h-4 text-gray-600 shrink-0" />
+                    <span>{vendor.Address}</span>
+                  </div>
+                  <div className="flex items-center gap-2 break-words">
+                    <StickyNote className="w-4 h-4 text-gray-600 shrink-0" />
+                    <span>{vendor.Notes || "N/A"}</span>
+                  </div>
+                </div>
               </CardContent>
+              <div className="flex space-x-2 mt-2 px-4 pb-4">
+                <button
+                  className="border border-gray-300 text-black font-semibold px-10 py-1 rounded-md text-center"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/vendors/edit/${vendor.VendorID}`, { state: { vendor } });
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteVendor(vendor.VendorID);
+                  }}
+                  className="border border-red-500 text-red-600 px-4 py-1 rounded-md min-w-[70px] text-center"
+                >
+                  Delete
+                </button>
+              </div>
             </Card>
           ))}
       </div>
