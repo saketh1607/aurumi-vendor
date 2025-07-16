@@ -220,16 +220,16 @@ const VendorCategories: React.FC = () => {
 
       {/* Add/Edit Category Dialog - Improved Styling */}
     <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-  <DialogContent className="sm:max-w-md w-full mx-4 bg-white border border-gray-200 shadow-2xl rounded-2xl p-0 overflow-hidden">
-    <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+  <DialogContent className="vendor-category-dialog DialogContent sm:max-w-md w-full mx-4 bg-white border border-gray-200 shadow-2xl rounded-2xl p-0 overflow-hidden">
+    <div className="DialogHeader bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
       <DialogHeader>
-        <DialogTitle className="text-xl font-bold text-white">
+        <DialogTitle className="DialogTitle text-xl font-bold text-white">
           {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
         </DialogTitle>
       </DialogHeader>
     </div>
     
-    <div className="p-6">
+    <div className="DialogForm p-6">
       <form onSubmit={handleAddOrUpdateCategory} className="space-y-5" noValidate>
         <div className="space-y-2">
           <label htmlFor="CategoryName" className="block text-sm font-semibold text-gray-700">
@@ -273,18 +273,18 @@ const VendorCategories: React.FC = () => {
         </div>
         
         {/* Fixed button container with proper flexbox */}
-        <div className="flex flex-row items-center justify-end gap-3 pt-4">
+        <div className="DialogActions flex flex-row items-center justify-end gap-3 pt-4">
           <Button 
             type="button" 
             variant="outline" 
             onClick={handleDialogClose}
-            className="min-w-[100px] px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+            className="cancel-btn min-w-[100px] px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
           >
             Cancel
           </Button>
           <Button 
             type="submit"
-            className="min-w-[100px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="update-btn min-w-[100px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             {isEditMode ? 'Update' : 'Add'}
           </Button>

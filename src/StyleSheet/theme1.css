@@ -289,3 +289,100 @@ body {
   background-color: #007bff;
   border-radius: 2px;
 }
+
+/* Responsive Vendor Category Dialog Styles */
+.vendor-category-dialog .DialogContent {
+  max-width: 95vw;
+  width: 100%;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 0;
+  background: #fff;
+}
+
+.vendor-category-dialog .DialogHeader {
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+  padding: 20px 28px 16px 28px;
+  border-radius: 18px 18px 0 0;
+}
+
+.vendor-category-dialog .DialogTitle {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.vendor-category-dialog .DialogForm {
+  padding: 28px 24px 20px 24px;
+}
+
+.vendor-category-dialog label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  color: #374151;
+}
+
+.vendor-category-dialog input,
+.vendor-category-dialog textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s;
+}
+
+.vendor-category-dialog input:focus,
+.vendor-category-dialog textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+.vendor-category-dialog .DialogActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.vendor-category-dialog .DialogActions button {
+  min-width: 100px;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.vendor-category-dialog .DialogActions .cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.vendor-category-dialog .DialogActions .update-btn {
+  background: #2563eb;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .vendor-category-dialog .DialogContent {
+    max-width: 98vw;
+    padding: 0;
+  }
+  .vendor-category-dialog .DialogHeader {
+    padding: 14px 12px 10px 12px;
+  }
+  .vendor-category-dialog .DialogForm {
+    padding: 16px 8px 12px 8px;
+  }
+  .vendor-category-dialog .DialogActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .vendor-category-dialog .DialogActions button {
+    width: 100%;
+  }
+}
