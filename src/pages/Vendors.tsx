@@ -217,7 +217,7 @@ const { id: VendorID } = useParams();
   }, [userDetails]);
 
   const handleDeleteVendor = async (vendorID: number) => {
-    if (!window.confirm("Are you sure you want to delete this vendor?")) return;
+    if (!(await showConfirm("Are you sure you want to delete this vendor?"))) return;
 
     setDeletingVendorId(vendorID);
 
@@ -390,7 +390,7 @@ const { id: VendorID } = useParams();
   };
   
 
-  const { showAlert } = useAlertDialog();
+  const { showAlert, showConfirm } = useAlertDialog();
 
   return (
     <div className="space-y-4 px-2 sm:px-4">
