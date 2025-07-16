@@ -13,7 +13,8 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogOverlay
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -217,51 +218,78 @@ const VendorCategories: React.FC = () => {
   </div>
 )}
 
-
-      {/* Add/Edit Category Dialog */}
+      {/* Add/Edit Category Dialog - Improved Styling */}
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleAddOrUpdateCategory} className="space-y-4" noValidate>
-            <div className="space-y-1">
-              <label htmlFor="CategoryName" className="text-sm font-medium text-gray-700">
-                Category Name<span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="CategoryName"
-                name="CategoryName"
-                value={formCategory.CategoryName}
-                onChange={handleChange}
-                placeholder="Enter category name"
-                className={missingFields.includes('CategoryName') ? 'border-red-500' : ''}
-                autoComplete="off"
-              />
-              {missingFields.includes('CategoryName') && (
-                <span className="text-xs text-red-500">This field is required.</span>
-              )}
-            </div>
+        <DialogContent className="sm:max-w-md w-full mx-4 bg-white border border-gray-200 shadow-2xl rounded-2xl p-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-white">
+                {isEditMode ? 'Edit Vendor Category' : 'Add Vendor Category'}
+              </DialogTitle>
+            </DialogHeader>
+          </div>
+          
+          <div className="p-6">
+            <form onSubmit={handleAddOrUpdateCategory} className="space-y-5" noValidate>
+              <div className="space-y-2">
+                <label htmlFor="CategoryName" className="block text-sm font-semibold text-gray-700">
+                  Category Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="CategoryName"
+                  name="CategoryName"
+                  value={formCategory.CategoryName}
+                  onChange={handleChange}
+                  placeholder="Enter category name"
+                  className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    missingFields.includes('CategoryName') 
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  autoComplete="off"
+                />
+                {missingFields.includes('CategoryName') && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠</span>
+                    This field is required
+                  </p>
+                )}
+              </div>
 
-            <div className="space-y-1">
-              <label htmlFor="Description" className="text-sm font-medium text-gray-700">Description</label>
-              <Textarea
-                id="Description"
-                name="Description"
-                value={formCategory.Description}
-                onChange={handleChange}
-                placeholder="Enter description"
-                autoComplete="off"
-              />
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="Description" className="block text-sm font-semibold text-gray-700">
+                  Description
+                </label>
+                <Textarea
+                  id="Description"
+                  name="Description"
+                  value={formCategory.Description}
+                  onChange={handleChange}
+                  placeholder="Enter description (optional)"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 resize-none"
+                  rows={3}
+                  autoComplete="off"
+                />
+              </div>
 
-            <div className="flex justify-between gap-2">
-              <Button type="button" variant="outline" className="custom-cancel-button" onClick={handleDialogClose}>
-                Cancel
-              </Button>
-              <Button type="submit">{isEditMode ? 'Update' : 'Add'}</Button>
-            </div>
-          </form>
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleDialogClose}
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  {isEditMode ? 'Update Category' : 'Add Category'}
+                </Button>
+              </div>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
