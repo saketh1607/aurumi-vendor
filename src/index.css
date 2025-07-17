@@ -121,3 +121,10 @@ ul, ol, li, dt, dd {
 .status-received {
   @apply bg-emerald-100 text-emerald-700;
 }
+@layer base {
+  h1, h2, h3, h4, h5, h6,
+  p, span, a, li, strong, em, blockquote,
+  pre, code, small, label, dt, dd {
+    @apply cursor-default select-none;
+  }
+}
