@@ -1,5 +1,13 @@
 /* Loading CSS */
 /* Full-screen center */
+h1, h2, h3, h4, h5, h6,
+p, span, b, strong, i, em, u, s, mark, small, sub, sup,
+code, kbd, abbr, blockquote, cite, pre,
+ul, ol, li, dt, dd {
+  cursor: default;
+/*   user-select: none; /* Optional: prevents text selection */ */
+}
+
 .loading-container {
   display: flex;
   justify-content: center;
